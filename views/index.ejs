@@ -1,0 +1,9 @@
+<%- include('universalhead') %>
+<body>
+	<div class="jumbotron">
+		<h1 class="text-center">Welcome!</h1>
+		<% for (let i = 0; i < teachers.length; i++) { %>
+			<%= teachers[i].lastName %>
+		<% } %>
+	</div>
+</body>
