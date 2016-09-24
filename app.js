@@ -89,7 +89,12 @@ app.get('/index', (req, res) => {
 			renderPage(
 				{
 					teachers: teachers,
-					teacherPaths: mongoose.model('Teacher').schema.paths
+					// This gets all the fields of a model/schema
+					teacherPaths: Object.keys(
+						mongoose.model(
+							'Teacher'
+						).schema.paths
+					)
 				},
 				req,
 				res
@@ -127,13 +132,31 @@ app.get('/alter/:collection', (req, res) => {
 		renderPage(
 			{
 				collection: db.collections[req.params.collection],
+				// There should be an s at the end of the collection name in the DB,
+				// thus, we cut of the s and capitalize the first letter, and we
+				// should have our model/schema.
+				collectionPaths: Object.keys(
+					mongoose.model(
+						req
+						  .params
+						  .collection
+						  .substring(0, 1)
+						  .toUpperCase()
+						  +
+						req
+						  .params
+						  .collection
+						  .substring(1, req.params.collection.length - 1)
+						  .toLowerCase()
+					).schema.paths
+				),
 				forcedPage: '/alter'
 			},
 			req,
 			res
 		);
 	}
-	// We can't find the collection the client is looking for, so... 404
+	// We can't find the collection the client is looking for, so... 404.
 	else {
 		res.redirect('/404');
 	}
