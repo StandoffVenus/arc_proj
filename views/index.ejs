@@ -1,9 +1,24 @@
-<%- include('universalhead') %>
-<body>
-	<div class="jumbotron">
-		<h1 class="text-center">Welcome!</h1>
-		<% for (let i = 0; i < teachers.length; i++) { %>
-			<%= teachers[i].lastName %>
-		<% } %>
-	</div>
-</body>
+<div class="jumbotron">
+	<h1 class="text-center">Welcome!</h1>
+</div>
+<div>
+	<table class="table">
+		<% let teacherFields = Object.keys(teacherPaths); %>
+		<thead>
+			<% for (let i = 0; i < teacherFields.length; i++) { %>
+				<% // Making sure that the mongo's variables don't get included in the output %>	
+				<% if (teacherFields[i].substring(0, 1) !== '_') { %>
+					<th>
+						<% // Making output of field names pretty %>
+						<%= (teacherFields[i].toLowerCase().indexOf('name') < 0) ? teacherFields[i].substring(0, 1).toUpperCase() + teacherFields[i].substring(1).toLowerCase() : "Name"; %>
+					</th>				
+				<% } %>
+			<% } %>
+		</thead>
+		<tbody>
+			<% for (let i = 0; i < teachers.length; i++) { %>
+
+			<% } %>	
+		</tbody>
+	</table>
+</div>

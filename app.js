@@ -1,11 +1,10 @@
-"use strict";
-
 	// Packages and variable declaration
 let mongo = require('mongodb'); // This is the DB - it is a non-relation DB called MongoDB
 let mongoose = require('mongoose'); // This is the ORM - makes mongo calls simpler for me
 let express = require('express'); // Express is a framework to simplify Node's HTTP package
 let util = require('util'); // util is a built-in package with better logging time stamps and such
-let child_process = require('child_process'); // child_process is a package made for spinning off children of a main process
+let child_process = require('child_process'); // child_process is a built-in package made for spinning off children of a main process
+let file_system = require('fs'); // fs is a built-in package that allows to do many different things with the filesystem
 let body_parser = require('body-parser'); // body-parser is a parser that makes POST's and such decrypted for us
 let ejs = require('ejs'); // ejs allows us to create dynamic web pages from the server side
 
@@ -13,27 +12,33 @@ let Schema = mongoose.Schema; // Schema allows you to create models for mongoose
 
 let GLOBAL_PORT = 3000; // Global port to communicate with localhost on
 
-// Spinning off a child process to open up mongo for communication
-let mongoShell = child_process.exec(
-	// Start the Mongo connection application
-	'mongod',
+// Spinning off a child process to open up Mongo for communication
+let mongoShell = child_process.exec('mongod', // Start the Mongo connection application
 	{
+		// Relocate to the folder containing mongod.exe
 		cwd: 'C:/Program Files/MongoDB/Server/3.2/bin/'
 	}
 );
 
 mongoose.connect('mongodb://localhost/app'); // Connecting to the DB in mongoose
-let db = mongoose.connection; // Grab said connection
+let db = mongoose.connection; // Initialize a variable with said connection
+
+db.on('timeout', (err) => {
+	util.log('Connection timeout.');
+});
 
 let Teacher = require('./Schemas/Teacher.js'); // Requiring a model I already created called teacher
 
 let app = express(); // Creating the "server" object
 
-// This sets up our "view engine." Express uses something called a view engine
-// to handle dynamically rendering pages (hence, why there is a method called
-// response.render) and here we are setting it a simple engine I use called ejs.
-// The setting of "views" is just to tell Express to look in the "views" directory
-// for all the views (that's what webpages are more accurately called in MVC design)
+// This serves files that don't need to be worried about (our css and what not)
+app.use(express.static('./public'));
+
+	// This sets up our "view engine." Express uses something called a view engine
+	// to handle dynamically rendering pages (hence, why there is a method called
+	// response.render) and here we are setting it a simple engine I use called ejs.
+	// The setting of "views" is just to tell Express to look in the "views" directory
+	// for all the views (that's what webpages are more accurately called in MVC design)
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
@@ -51,19 +56,99 @@ app.use(body_parser.urlencoded( { extended: true } ));
 	// views exist in somewhat different contexts from our main thread, and thus don't know about
 	// all the packages and what not that we're using without being passed references to them.
 
-// The index page, aka, "localhost" or "localhost/"
-app.get('/', (req, res, next) => {
-	Teacher.find( (err, teachers) => {
-		res.render('index', 
+// This method will do res.render with the template page so I don't have to repeat myself
+let renderPage = (model, req, res) => {
+	// Redirects for a forced url
+	if (typeof model.forcedUrl !== 'undefined' && model.forcedUrl !== req.originalUrl)
+		res.redirect(model.forcedUrl);
+
+	// Checks to see if a specific page should be sent over the requested url
+	if (typeof model.forcedPage !== 'undefined')
+		model.page = process.cwd() + '\\views' + model.forcedPage;
+	else
+		model.page = process.cwd() + '\\views' + req.path;
+
+	// Render 'template.ejs' with our new model.
+	res.render('template', model);
+}
+
+// Redirect from 'localhost' or 'localhost/' to index page
+app.get('/', (req, res) => {
+	res.redirect('/index');
+});
+
+// The index page
+app.get('/index', (req, res) => {
+	// Look for all the entries in the teachers collection
+	Teacher.find( 
+		{
+			
+		}, 
+		(err, teachers) => {
+			// Present the user with all of our teachers
+			renderPage(
+				{
+					teachers: teachers,
+					teacherPaths: mongoose.model('Teacher').schema.paths
+				},
+				req,
+				res
+			);
+		}
+	);
+});
+
+app.get('/alter', (req, res) => {
+	res.redirect('/alter/show');
+});
+
+// The alter page
+app.get('/alter/:collection', (req, res) => {
+	// The client is looking for the base page
+	if (req.params.collection === 'show') {
+		// Send them the base page (since the url is succeeded by 'show'
+		// our application will attempt to serve them 'show.ejs'; we don't 
+		// have that view, so we serve them 'alter.ejs' instead)
+		renderPage(
 			{
-				teachers: teachers
-			}
-		)
-	})
+				collections: db.collections,
+				forcedPage: '/alter'
+			},
+			req,
+			res
+		);
+	}
+	// The client is looking for a collection and we have it
+	else if (typeof db.collections[req.params.collection] !== 'undefined') {
+		// Send them the collection, but use alter.ejs for the view since we
+		// don't want to have a specific page built for every collection.
+		// Too much work! Lets be a lazy, efficient programmer rather than
+		// a meticulous, anti-user-input-for-collections-and-DB one.
+		renderPage(
+			{
+				collection: db.collections[req.params.collection],
+				forcedPage: '/alter'
+			},
+			req,
+			res
+		);
+	}
+	// We can't find the collection the client is looking for, so... 404
+	else {
+		res.redirect('/404');
+	}
+});
+
+// 404
+app.use( (req, res) => {
+		res.status(404);
+		res.render(
+			'404.ejs'
+		);
 });
 
 
-	// Beginning running the server and log it to console
+// Beginning running the server and log it to console
 app.listen(GLOBAL_PORT, (err) => {
 	if (!err)
 		util.log(`Server running on ${GLOBAL_PORT}.`);

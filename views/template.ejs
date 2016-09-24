@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en-US" style="height: 100%;">
+	<head>
+		<% // All the styles and JS we'll need %>
+		<%- include('universalhead.ejs') %>
+	</head>
+	<body class="container">
+		<br />
+		<% // Including whichever page the model asks for %>
+		<%- include( page ); %>
+	</body>
+</html>
