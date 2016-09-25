@@ -1,35 +1,57 @@
+<% let printField = include('fieldHelper.ejs') %>
+
 <% // Output all collection names %>
 <% if (typeof collections !== 'undefined') { %>
-	<div class="jumbotron">
+	<div class="jumbotron row">
 		<h1 class="text-center">Alter a DB collection</h1>
 	</div>
-	<ul>
-		<% let collectionNames = Object.keys(collections); %>
-		<% for (let i = 0; i < collectionNames.length; i++) { %>
-			<li><a href="<%= collectionNames[i] %>"><%= collectionNames[i].substring(0, 1).toUpperCase() + collectionNames[i].substring(1) %></a></li>
-		<% } %>
-	</ul>
+	<div class="row">
+		<ul>
+			<% let collectionNames = Object.keys(collections); %>
+			<% for (let i = 0; i < collectionNames.length; i++) { %>
+				<li><a href="<%= collectionNames[i] %>"><%= collectionNames[i].substring(0, 1).toUpperCase() + collectionNames[i].substring(1) %></a></li>
+			<% } %>
+		</ul>
+	</div>
 <% // Output a collection and its fields %>
 <% } else { %>
-	<div class="jumbotron">
+	<div class="jumbotron row">
 		<h1 class="text-center">
 			Altering: <em>"<%= collection.name.substring(0, 1).toUpperCase() + collection.name.substring(1) %>"</em>
 		</h1>
 	</div>
-	<h3>
-		Entries inside:
-	</h3>
-	<table class="table">
-		<tr>
-			<% for (let i = 0; i < collectionPaths.length; i++) { %>
-				<% // Making sure that the mongo's variables don't get included in the output %>	
-				<% if (collectionPaths[i].substring(0, 1) !== '_') { %>
-					<th>
-						<% // Making output of field names pretty %>
-						<%= (collectionPaths[i].toLowerCase().indexOf('name') < 0) ? collectionPaths[i].substring(0, 1).toUpperCase() + collectionPaths[i].substring(1).toLowerCase() : "Name"; %>
-					</th>
+	<div>
+		<a href=""></a>
+	</div>
+	<div class="row">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<% for (let i = 0; i < collectionPaths.length; i++) { %>
+						<% // Making sure that the mongo's variables don't get included in the output %>	
+						<% if (collectionPaths[i].substring(0, 1) !== '_') { %>
+							<th>
+								<% // Making output of field names pretty %>
+								<%= printField(collectionPaths[i]); %>
+							</th>
+						<% } %>
+					<% } %>
+				</tr>
+			</thead>
+			<tbody>
+				<% for (let i = 0; i < collectionEntries.length; i++) { %>
+					<tr>
+						<% for (let j = 0; j < collectionPaths.length; i++) { %>
+							<th>
+								<% if (collectionPaths[j] !== '__v') { %>
+									<%= collectionEntries[i][collectionPaths[j]]; %>
+								<% } %>
+							</th>
+						<% } %>
+					</tr>
 				<% } %>
-			<% } %>
-		</tr>
-	</table>
+			</tbody>
+		</table>
+	</div>
 <% } %>

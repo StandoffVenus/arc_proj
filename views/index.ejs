@@ -1,3 +1,5 @@
+<% let printField = include('fieldHelper.ejs') %>
+
 <div class="jumbotron">
 	<h1 class="text-center">Welcome!</h1>
 </div>
@@ -9,8 +11,7 @@
 					<% // Making sure that the mongo's variables don't get included in the output %>	
 					<% if (teacherPaths[i].substring(0, 1) !== '_') { %>
 						<th>
-							<% // Making output of field names pretty %>
-							<%= (teacherPaths[i].toLowerCase().indexOf('name') < 0) ? teacherPaths[i].substring(0, 1).toUpperCase() + teacherPaths[i].substring(1).toLowerCase() : "Name"; %>
+							<%= printField(teacherPaths[i]); %>
 						</th>				
 					<% } %>
 				<% } %>
@@ -18,7 +19,7 @@
 		</thead>
 		<tbody>
 			<% for (let i = 0; i < teachers.length; i++) { %>
-
+				
 			<% } %>	
 		</tbody>
 	</table>

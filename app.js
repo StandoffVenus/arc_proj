@@ -23,8 +23,8 @@ let mongoShell = child_process.exec('mongod', // Start the Mongo connection appl
 mongoose.connect('mongodb://localhost/app'); // Connecting to the DB in mongoose
 let db = mongoose.connection; // Initialize a variable with said connection
 
-db.on('timeout', (err) => {
-	util.log('Connection timeout.');
+db.on('error', (err) => {
+	util.log(err.substring(0, err.toString().indexOf('\n')));
 });
 
 let Teacher = require('./Schemas/Teacher.js'); // Requiring a model I already created called teacher
@@ -63,10 +63,10 @@ let renderPage = (model, req, res) => {
 		res.redirect(model.forcedUrl);
 
 	// Checks to see if a specific page should be sent over the requested url
-	if (typeof model.forcedPage !== 'undefined')
-		model.page = process.cwd() + '\\views' + model.forcedPage;
-	else
+	if (typeof model.page === 'undefined')
 		model.page = process.cwd() + '\\views' + req.path;
+	else
+		model.page = process.cwd() + '\\views' + model.page;
 
 	// Render 'template.ejs' with our new model.
 	res.render('template', model);
@@ -108,7 +108,7 @@ app.get('/alter', (req, res) => {
 });
 
 // The alter page
-app.get('/alter/:collection', (req, res) => {
+app.get('/alter/:collection', (req, res, next) => {
 	// The client is looking for the base page
 	if (req.params.collection === 'show') {
 		// Send them the base page (since the url is succeeded by 'show'
@@ -117,7 +117,7 @@ app.get('/alter/:collection', (req, res) => {
 		renderPage(
 			{
 				collections: db.collections,
-				forcedPage: '/alter'
+				page: '/alter'
 			},
 			req,
 			res
@@ -125,36 +125,70 @@ app.get('/alter/:collection', (req, res) => {
 	}
 	// The client is looking for a collection and we have it
 	else if (typeof db.collections[req.params.collection] !== 'undefined') {
+		// There should be an s at the end of the collection name in the DB,
+		// thus, we cut of the s and capitalize the first letter, and we
+		// should have our model/schema.
+		let collection = mongoose.model(
+									req
+									  .params
+									  .collection
+									  .substring(0, 1)
+									  .toUpperCase()
+									  +
+									req
+									  .params
+									  .collection
+									  .substring(1, req.params.collection.length - 1)
+									  .toLowerCase()
+								);
+
 		// Send them the collection, but use alter.ejs for the view since we
 		// don't want to have a specific page built for every collection.
 		// Too much work! Lets be a lazy, efficient programmer rather than
 		// a meticulous, anti-user-input-for-collections-and-DB one.
-		renderPage(
-			{
-				collection: db.collections[req.params.collection],
-				// There should be an s at the end of the collection name in the DB,
-				// thus, we cut of the s and capitalize the first letter, and we
-				// should have our model/schema.
-				collectionPaths: Object.keys(
-					mongoose.model(
-						req
-						  .params
-						  .collection
-						  .substring(0, 1)
-						  .toUpperCase()
-						  +
-						req
-						  .params
-						  .collection
-						  .substring(1, req.params.collection.length - 1)
-						  .toLowerCase()
-					).schema.paths
-				),
-				forcedPage: '/alter'
-			},
-			req,
-			res
-		);
+
+		// If they requested a specific entry
+		if (typeof req.query.id !== 'undefined') {
+			// id has to be 12 bytes
+			if (Buffer.byteLength(req.query.id, 'utf8') !== 12)
+				res.redirect('/404');
+
+			collection.find( 
+				{
+					'_id': mongo.ObjectId(req.query.id)
+				},
+				(err, entries) => {
+					renderPage(
+						{
+							collection: db.collections[req.params.collection],
+							collectionEntries: entries,
+							collectionPaths: Object.keys(
+								collection.schema.paths
+							),
+							page: '/alter'
+						},
+						req,
+						res
+					);
+				}
+			);
+		}
+		else {
+			collection.find( (err, entries) => {
+				renderPage(
+					{
+						collection: db.collections[req.params.collection],
+						collectionEntries: entries,
+						collectionPaths: Object.keys(
+							collection.schema.paths
+						),
+						page: '/alter'
+					},
+					req,
+					res
+				);
+			});
+		}
 	}
 	// We can't find the collection the client is looking for, so... 404.
 	else {

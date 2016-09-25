@@ -1,0 +1,43 @@
+<% 
+	// Function to split possible name fields for us
+	return (str) => {
+		return (str.toLowerCase().indexOf('name') < 0) ? 
+				str
+					.substring(0, 1)
+					.toUpperCase() 
+			+	str
+					.substring(1)
+					.toLowerCase() 
+
+	  	: // Or
+
+			  	str
+			  		.substring(0, 1)
+			  		.toUpperCase() 
+		  	+  	str
+		  			.substring(
+		  				1
+		  			,	str
+		  					.toLowerCase()
+		  					.indexOf('name')
+		  			)
+		  	+  	' ' 
+		  	+  	str
+		  			.substring(
+			  			str
+			  				.toLowerCase()
+			  				.indexOf('name')
+			  		,	str
+			  				.toLowerCase()
+			  				.indexOf('name') + 1
+			  		)
+		  			.toUpperCase()
+		  	+	str
+		  			.substring(
+		  				str
+		  					.toLowerCase()
+		  					.indexOf('name') + 1
+					)
+		; // End
+	}
+%>
