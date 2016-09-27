@@ -1,3 +1,13 @@
-.rounded {
-	border-radius: 25px;
+.input-group-addon {
+	min-width: 10em;
+	text-align: left;
+}
+
+.dropdown-toggle {
+	min-width: 8em;
+}
+
+.hidden-list {
+	list-style-type: none;
+	padding-bottom: 1em;
 }

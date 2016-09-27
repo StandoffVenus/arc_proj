@@ -4,7 +4,7 @@ let Schema = mongoose.Schema;
 let TeacherSchema = new Schema({
 	lastName: String,
 	classes: Array,
-	hours: Array,
+	hours: Object,
 	gender: Number,
 	email: String,
 	homeroom: Number,

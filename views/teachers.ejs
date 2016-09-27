@@ -1,0 +1,29 @@
+<div class="jumbotron">
+	<h1 class="text-center">Welcome!</h1>
+</div>
+<div>
+	<table class="table">
+		<thead>
+			<tr>
+				<% for (let i = 0; i < teacherPaths.length; i++) { %>
+					<% if (teacherPaths[i] !== 'gender') { %>
+						<% if (teacherPaths[i] !== 'lastName') { %>
+							<th>
+								<%= teacherPaths[i].substring(0, 1).toUpperCase() + teacherPaths[i].substring(1); %>
+							</th>
+						<% } else { %>
+							<th>
+								Name
+							</th>
+						<% } %>
+					<% } %>
+				<% } %>
+			</tr>
+		</thead>
+		<tbody>
+			<% for (let i = 0; i < teachers.length; i++) { %>
+				<%- include('modelTemplates/teacher.ejs', { teacher: teachers[i] }) %>
+			<% } %>	
+		</tbody>
+	</table>
+</div>

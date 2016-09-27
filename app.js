@@ -1,38 +1,47 @@
 	// Packages and variable declaration
-let mongo = require('mongodb'); // This is the DB - it is a non-relation DB called MongoDB
-let mongoose = require('mongoose'); // This is the ORM - makes mongo calls simpler for me
-let express = require('express'); // Express is a framework to simplify Node's HTTP package
-let util = require('util'); // util is a built-in package with better logging time stamps and such
-let child_process = require('child_process'); // child_process is a built-in package made for spinning off children of a main process
-let file_system = require('fs'); // fs is a built-in package that allows to do many different things with the filesystem
-let body_parser = require('body-parser'); // body-parser is a parser that makes POST's and such decrypted for us
-let ejs = require('ejs'); // ejs allows us to create dynamic web pages from the server side
+let mongo = require('mongodb'), // This is the DB - it is a non-relation DB called MongoDB
+	mongoose = require('mongoose'), // This is the ORM - makes mongo calls simpler for me
+	express = require('express'), // Express is a framework to simplify Node's HTTP package
+	util = require('util'), // util is a built-in package with better logging time stamps and such
+	child_process = require('child_process'), // child_process is a built-in package made for spinning off children of a main process
+	file_system = require('fs'), // fs is a built-in package that allows to do many different things with the filesystem
+	body_parser = require('body-parser'), // body-parser is a parser that makes POST's and such decrypted for us
+	ejs = require('ejs'), // ejs allows us to create dynamic web pages from the server side
+	validator = require('express-validator'), // express-validator will allow us easy validation of POST data
+	flash = require('connect-flash'), // Flash allows us to keep messages in our locals so we can present them across pages
+	session = require('express-session'), // Flash requires sessions to be kept across pages
 
-let Schema = mongoose.Schema; // Schema allows you to create models for mongoose and the DB you're using
+	Schema = mongoose.Schema, // Schema allows you to create models for mongoose and the DB you're using
 
-let GLOBAL_PORT = 3000; // Global port to communicate with localhost on
+	// All the actions we will allow on our collections 
+	COLLECTION_ACTIONS = {
+		"edit": 1,
+		"delete": 1,
+		"add": 1
+	},
 
-// Spinning off a child process to open up Mongo for communication
-let mongoShell = child_process.exec('mongod', // Start the Mongo connection application
-	{
-		// Relocate to the folder containing mongod.exe
-		cwd: 'C:/Program Files/MongoDB/Server/3.2/bin/'
-	}
-);
+	GLOBAL_PORT = 3000, // Global port to communicate with localhost on
+
+	// Spinning off a child process to open up Mongo for communication
+	mongoShell = child_process.exec('mongod', // Start the Mongo connection application
+		{
+			// Relocate to the folder containing mongod.exe
+			cwd: 'C:/Program Files/MongoDB/Server/3.2/bin/'
+		}
+	);
 
 mongoose.connect('mongodb://localhost/app'); // Connecting to the DB in mongoose
 let db = mongoose.connection; // Initialize a variable with said connection
 
 db.on('error', (err) => {
-	util.log(err.substring(0, err.toString().indexOf('\n')));
+	mongoose.disconnect();
+	mongoose.connect('mongodb://localhost/app');
 });
 
 let Teacher = require('./Schemas/Teacher.js'); // Requiring a model I already created called teacher
 
 let app = express(); // Creating the "server" object
 
-// This serves files that don't need to be worried about (our css and what not)
-app.use(express.static('./public'));
 
 	// This sets up our "view engine." Express uses something called a view engine
 	// to handle dynamically rendering pages (hence, why there is a method called
@@ -45,11 +54,42 @@ app.set('views', 'views');
 
 	// This section is called middleware - if you don't know what that is
 	// you can read about it here: https://expressjs.com/en/guide/using-middleware.html
+// This serves our public folder without having to specify in our ejs
+app.use('/static', express.static(__dirname + '/public'));
 
-// This parses POST's for us
+// This parses and validates POST's for us
 app.use(body_parser.json( { extended: true } ));
 app.use(body_parser.urlencoded( { extended: true } ));
+app.use(
+	validator(
+		{
+			errorFormatter: function(param, msg, value) {
+		      var namespace = param.split('.')
+		      , root    = namespace.shift()
+		      , formParam = root;
 
+		    while(namespace.length) {
+		      formParam += '[' + namespace.shift() + ']';
+		    }
+		    return {
+		      param : formParam,
+		      msg   : msg,
+		      value : value
+		    };
+		  }
+		}
+	)
+);
+
+// Adding sessions
+app.use(session({
+	secret: 'ahwzXmEAShpD9BZlRIQz',
+	saveUninitialized: true,
+	resave: true
+}));
+
+// Adding flash messaging
+app.use(flash());
 
 	// This section is also technically middleware, but it will handle the pages in my own manner.
 	// You'll see me use redefinitions a lot, but in JSON passed to our views. This is because our
@@ -72,13 +112,53 @@ let renderPage = (model, req, res) => {
 	res.render('template', model);
 }
 
+app.use('*', (req, res, next) => {
+	// After every request, we will check if flash has a message for us to display
+	res.locals.success_msg = req.flash('success_msg');
+	res.locals.error_msg = req.flash('error_msg');
+	res.locals.error = req.flash('error');
+
+	// This logs all requests a user makes
+	util.log(`$Request to ${req.path} via ${req.method.toUpperCase()}`);
+	next();
+});
+
 // Redirect from 'localhost' or 'localhost/' to index page
 app.get('/', (req, res) => {
 	res.redirect('/index');
 });
 
-// The index page
+// Index page - GET
 app.get('/index', (req, res) => {
+	Teacher.find(
+		{
+
+		},
+		(err, teachers) => {
+			renderPage(
+				{
+					teachers: teachers
+				},
+				req,
+				res
+			);
+		}
+	);
+});
+
+// Index page - POST
+app.post('/index', (req, res) => {
+	// Check POST data
+
+	// Validation succeeds
+	req.flash('success_msg', 'Successfully checked in.');
+
+	// Validation fails
+	req.flash('error_msg', 'Error: Sign-in failed due to ' /* validation errors */);
+});
+
+// All teachers
+app.get('/teachers', (req, res) => {
 	// Look for all the entries in the teachers collection
 	Teacher.find( 
 		{
@@ -91,9 +171,7 @@ app.get('/index', (req, res) => {
 					teachers: teachers,
 					// This gets all the fields of a model/schema
 					teacherPaths: Object.keys(
-						mongoose.model(
-							'Teacher'
-						).schema.paths
+						Teacher.schema.obj
 					)
 				},
 				req,
@@ -103,97 +181,29 @@ app.get('/index', (req, res) => {
 	);
 });
 
-app.get('/alter', (req, res) => {
-	res.redirect('/alter/show');
-});
+app.get('/teachers/:action', (req, res) => {
+	Teacher.find(
+	{
+		_id: req.params.id
+	},
+	(err, teacher) => {
+		if (err || teacher === null)
+			res.redirect('/404');
 
-// The alter page
-app.get('/alter/:collection', (req, res, next) => {
-	// The client is looking for the base page
-	if (req.params.collection === 'show') {
-		// Send them the base page (since the url is succeeded by 'show'
-		// our application will attempt to serve them 'show.ejs'; we don't 
-		// have that view, so we serve them 'alter.ejs' instead)
 		renderPage(
 			{
-				collections: db.collections,
-				page: '/alter'
+				teachers: teacher,
+				teacherPaths: Object.keys(
+					mongoose.model(
+						'Teacher'
+					).schema.obj
+				)
 			},
 			req,
 			res
-		);
+		)
 	}
-	// The client is looking for a collection and we have it
-	else if (typeof db.collections[req.params.collection] !== 'undefined') {
-		// There should be an s at the end of the collection name in the DB,
-		// thus, we cut of the s and capitalize the first letter, and we
-		// should have our model/schema.
-		let collection = mongoose.model(
-									req
-									  .params
-									  .collection
-									  .substring(0, 1)
-									  .toUpperCase()
-									  +
-									req
-									  .params
-									  .collection
-									  .substring(1, req.params.collection.length - 1)
-									  .toLowerCase()
-								);
-
-		// Send them the collection, but use alter.ejs for the view since we
-		// don't want to have a specific page built for every collection.
-		// Too much work! Lets be a lazy, efficient programmer rather than
-		// a meticulous, anti-user-input-for-collections-and-DB one.
-
-		// If they requested a specific entry
-		if (typeof req.query.id !== 'undefined') {
-			// id has to be 12 bytes
-			if (Buffer.byteLength(req.query.id, 'utf8') !== 12)
-				res.redirect('/404');
-
-			collection.find( 
-				{
-					'_id': mongo.ObjectId(req.query.id)
-				},
-				(err, entries) => {
-					renderPage(
-						{
-							collection: db.collections[req.params.collection],
-							collectionEntries: entries,
-							collectionPaths: Object.keys(
-								collection.schema.paths
-							),
-							page: '/alter'
-						},
-						req,
-						res
-					);
-				}
-			);
-		}
-		else {
-			collection.find( (err, entries) => {
-				renderPage(
-					{
-						collection: db.collections[req.params.collection],
-						collectionEntries: entries,
-						collectionPaths: Object.keys(
-							collection.schema.paths
-						),
-						page: '/alter'
-					},
-					req,
-					res
-				);
-			});
-		}
-	}
-	// We can't find the collection the client is looking for, so... 404.
-	else {
-		res.redirect('/404');
-	}
+	);
 });
 
 // 404

@@ -1,0 +1,27 @@
+<tr>
+	<th><%= (teacher.gender === 0) ? `Mr. ${teacher.lastName}` : `Mrs. ${teacher.lastName}`; %></th>
+	<th>
+		<% for (let i = 0; i < teacher.classes.length; i++) { %>
+			<%= teacher.classes[i] %><br />
+		<% } %>
+	</th>
+	<th>
+		<% for (let i = 0; i < teacher.classes.length; i++) { %>
+			<%= teacher.classes[i] %><br />
+			<ul>
+				<% for (let j = 0; j < teacher.hours[teacher.classes[i]].length; j++) { %>
+					<li><%= teacher.hours[teacher.classes[i]][j] %></li>
+				<% } %>
+			</ul>
+		<% } %>
+	</th>
+	<th>
+		<%= teacher.email %>
+	</th>
+	<th>
+		<%= teacher.homeroom %>
+	</th>
+	<th>
+		<%= teacher.extension %>
+	</th>
+</tr>
