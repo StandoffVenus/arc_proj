@@ -102,14 +102,14 @@
 			<div class="col-md-8 col-md-offset-2 input-group">
 				<div class="input-group-addon">Coming From</div>
 				<div class="btn-group">
-					<button data-toggle="dropdown" class="btn btn-info dropdown-toggle">Classroom&nbsp<span class="caret"></span></button>
+					<button data-toggle="dropdown" class="btn btn-info dropdown-toggle">Study Hall&nbsp<span class="caret"></span></button>
 					<ul class="dropdown-menu">
-						<li><input type="radio" id="studyhallRadio" name="comingFrom" value="studyhall" onclick="toggleStudyHallBox(true)"><label for="studyhallRadio">Study Hall</label></li>
-						<li><input type="radio" id="classroomRadio" name="comingFrom" value="classroom" checked="checked" onclick="toggleStudyHallBox(false)"><label for="classroomRadio">Classroom</label></li>
+						<li><input type="radio" id="studyhallRadio" name="comingFrom" value="studyhall" checked="checked" onclick="toggleStudyHallBox(true)"><label for="studyhallRadio">Study Hall</label></li>
+						<li><input type="radio" id="classroomRadio" name="comingFrom" value="classroom" onclick="toggleStudyHallBox(false)"><label for="classroomRadio">Classroom</label></li>
 						<li><input type="radio" id="lunchRadio" name="comingFrom" value="lunch" onclick="toggleStudyHallBox(false)"><label for="lunchRadio">Lunch</label></li>
 					</ul>
 				</div>
-				<input type="text" id="studyhallBox" class="input-group-addon" placeholder="Room Number" style="display: none;">
+				<input type="text" id="studyhallBox" class="input-group-addon" placeholder="Room Number">
 			</div>
 			<br />
 			<h2 class="text-center well">ARC Information</h2>
