@@ -22,6 +22,8 @@ let mongo = require('mongodb'), // This is the DB - it is a non-relation DB call
 
 	GLOBAL_PORT = 3000, // Global port to communicate with localhost on
 
+	STUDENTS = [], // Students checked in
+
 	// Spinning off a child process to open up Mongo for communication
 	mongoShell = child_process.exec('mongod', // Start the Mongo connection application
 		{
@@ -38,7 +40,21 @@ db.on('error', (err) => {
 	mongoose.connect('mongodb://localhost/app');
 });
 
-let Teacher = require('./Schemas/Teacher.js'); // Requiring a model I already created called teacher
+let Student = require('./Schemas/Student.js'), 	// Student schema
+	Teacher = require('./Schemas/Teacher.js'); 	// Teacher schema
+
+// Getting all previously logged-in students
+Student.find(
+	{
+
+	},
+	(err, students) => {
+		if (err)
+			throw err;
+
+		STUDENTS = students;
+	}
+);
 
 let app = express(); // Creating the "server" object
 
@@ -112,6 +128,7 @@ let renderPage = (model, req, res) => {
 	res.render('template', model);
 }
 
+// For every single page
 app.use('*', (req, res, next) => {
 	// After every request, we will check if flash has a message for us to display
 	res.locals.success_msg = req.flash('success_msg');
@@ -119,7 +136,7 @@ app.use('*', (req, res, next) => {
 	res.locals.error = req.flash('error');
 
 	// This logs all requests a user makes
-	util.log(`$Request to ${req.path} via ${req.method.toUpperCase()}`);
+	util.log(`Request to ${req.path} via ${req.method.toUpperCase()}`);
 	next();
 });
 
@@ -128,13 +145,27 @@ app.get('/', (req, res) => {
 	res.redirect('/index');
 });
 
-// Index page - GET
+// Index page
 app.get('/index', (req, res) => {
+	renderPage(
+		{
+			students: STUDENTS
+		},
+		req,
+		res
+	);
+});
+
+// Check-in page - GET
+app.get('/checkin', (req, res) => {
 	Teacher.find(
 		{
 
 		},
 		(err, teachers) => {
+			if (err)
+				throw err;
+
 			renderPage(
 				{
 					teachers: teachers
@@ -146,17 +177,6 @@ app.get('/index', (req, res) => {
 	);
 });
 
-// Index page - POST
-app.post('/index', (req, res) => {
-	// Check POST data
-
-	// Validation succeeds
-	req.flash('success_msg', 'Successfully checked in.');
-
-	// Validation fails
-	req.flash('error_msg', 'Error: Sign-in failed due to ' /* validation errors */);
-});
-
 // All teachers
 app.get('/teachers', (req, res) => {
 	// Look for all the entries in the teachers collection
@@ -165,6 +185,9 @@ app.get('/teachers', (req, res) => {
 			
 		}, 
 		(err, teachers) => {
+			if (err)
+				throw err;
+
 			// Present the user with all of our teachers
 			renderPage(
 				{
@@ -221,4 +244,22 @@ app.listen(GLOBAL_PORT, (err) => {
 		util.log(`Server running on ${GLOBAL_PORT}.`);
 	else
 		throw new Error(err);
+});
+
+// On some crash-worthy error
+process.on('unhandledException', (exception) => {
+	util.log('Encountered exception. Saving checked-in students...');
+
+	// Save students that are checked-in
+	STUDENTS.forEach( (student) => {
+		student.save( (err) => {
+			if (err)
+				util.log(`Error saving student (${student.name}):\n\n${err}`);
+		});
+	});
+
+	util.log('\t[EXCEPTION]\n\n' + exception);
+
+	// Close the program
+	process.exit(0);
 });
