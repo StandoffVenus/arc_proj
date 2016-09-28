@@ -53,6 +53,11 @@ Student.find(
 			throw err;
 
 		STUDENTS = students;
+
+		// After we grab all the students, clear the DB for later
+		students.forEach( (student) => {
+			student.remove();
+		});
 	}
 );
 
@@ -114,6 +119,9 @@ app.use(flash());
 
 // This method will do res.render with the template page so I don't have to repeat myself
 let renderPage = (model, req, res) => {
+	if (typeof model.errors === 'undefined')
+		model.errors = {};
+
 	// Redirects for a forced url
 	if (typeof model.forcedUrl !== 'undefined' && model.forcedUrl !== req.originalUrl)
 		res.redirect(model.forcedUrl);
@@ -177,6 +185,38 @@ app.get('/checkin', (req, res) => {
 	);
 });
 
+app.post('/checkin', (req, res) => {
+	req.checkBody('studentName', 'The name field is required.').notEmpty();
+	req.checkBody('teacherName', 'No teacher was chosen.').notEmpty();
+	req.checkBody('')
+	req.check()
+
+	if (req.validationErrors()) {
+		Teacher.find(
+			{
+
+			},
+			(err, teachers) => {
+				if (err)
+					throw err;
+
+				renderPage(
+					{
+						errors: req.validationErrors(),
+						teachers: teachers
+					},
+					req,
+					res
+				);
+			}
+		);
+	}
+	else {
+		res.redirect('/');
+		req.flash('success_msg', `Successfully logged ${req.body.name} in.`);
+	}
+});
+
 // All teachers
 app.get('/teachers', (req, res) => {
 	// Look for all the entries in the teachers collection
@@ -188,11 +228,10 @@ app.get('/teachers', (req, res) => {
 			if (err)
 				throw err;
 
-			// Present the user with all of our teachers
 			renderPage(
 				{
 					teachers: teachers,
-					// This gets all the fields of a model/schema
+					// This gets all the fields of Teacher schema
 					teacherPaths: Object.keys(
 						Teacher.schema.obj
 					)
@@ -205,6 +244,7 @@ app.get('/teachers', (req, res) => {
 });
 
 app.get('/teachers/:action', (req, res) => {
+	// Look for the specific teacher
 	Teacher.find(
 	{
 		_id: req.params.id
@@ -216,10 +256,9 @@ app.get('/teachers/:action', (req, res) => {
 		renderPage(
 			{
 				teachers: teacher,
+				// Gets the fields of Teacher schema
 				teacherPaths: Object.keys(
-					mongoose.model(
-						'Teacher'
-					).schema.obj
+					Teacher.schema.obj
 				)
 			},
 			req,
@@ -246,10 +285,34 @@ app.listen(GLOBAL_PORT, (err) => {
 		throw new Error(err);
 });
 
+// Windows doesn't support any exit signals, but this works well enough
 // On some crash-worthy error
-process.on('unhandledException', (exception) => {
-	util.log('Encountered exception. Saving checked-in students...');
+process.once('unhandledException', (exception) => {
+	util.log('\t[EXCEPTION]\n\n' + exception);
 
+	// Close the program - will raise an async event, too, because of process.on('exit')'s listener
+	util.log('Encountered exception. Saving checked-in students...');
+	process.exit(0);
+});
+
+
+// On an exit
+process.once('exit', () => {
+	// Save students that are checked-in
+	STUDENTS.forEach( (student, index) => {
+		student.save( (err) => {
+			if (err)
+				util.log(`Error saving student (${student.name}):\n\n${err}`);
+
+			if (index + 1 === STUDENTS.length)
+				// Close the program
+				process.exit(0);
+		});
+	});
+});
+
+// On a console exit (Ctrl + C, which is known a "SIGINT")
+process.once('SIGINT', () => {
 	// Save students that are checked-in
 	STUDENTS.forEach( (student) => {
 		student.save( (err) => {
@@ -257,9 +320,4 @@ process.on('unhandledException', (exception) => {
 				util.log(`Error saving student (${student.name}):\n\n${err}`);
 		});
 	});
-
-	util.log('\t[EXCEPTION]\n\n' + exception);
-
-	// Close the program
-	process.exit(0);
 });

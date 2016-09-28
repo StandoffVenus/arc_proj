@@ -6,7 +6,21 @@
 	</head>
 	<body class="container">
 		<br />
-		<% // Including whichever page the model asks for %>
+		<% let keys = Object.keys(errors); %>
+		<% if (keys.length > 0) { %>
+			<div class="well">
+				<h2 class="text-danger text-center">Error filling out fields!</h2>
+				<ul>
+					<% for (let i = 0; i < keys.length; i++) { %>
+						<li class="text-danger text-center hidden-list"><strong><%= errors[keys[i]].msg %></strong></li>
+					<% } %>
+				</ul>
+			</div>
+			<br />
+			<br />
+		<% } %>
+
+		<% // Implementing passed page %>
 		<%- include( page ); %>
 	</body>
 </html>

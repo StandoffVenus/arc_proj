@@ -27,6 +27,8 @@ let buildTeachersBox = () => {
 		input.setAttribute('value', teacher.name);
 
 		input.addEventListener('click', () => {
+			document.getElementById('yourTeacherClassesPlaceholder').innerHTML = 'Choose class&nbsp<span class="caret"></span>';
+			document.getElementById('yourTeacherHourPlaceholder').innerHTML = 'Choose hour(s)&nbsp<span class="caret"></span>';
 			updateClassChoice(index);
 		});
 
@@ -62,6 +64,7 @@ let updateClassChoice = (index) => {
 		input.setAttribute('value', _class);
 
 		input.addEventListener('click', () => {
+			document.getElementById('yourTeacherHourPlaceholder').innerHTML = 'Choose hour(s)&nbsp<span class="caret"></span>';
 			eliminateInvalidPeriods(ALL_TEACHERS[index].hours[_class])
 		});
 
@@ -73,7 +76,6 @@ let updateClassChoice = (index) => {
 }
 
 let eliminateInvalidPeriods = (hours) => {
-	document.getElementById('yourTeacherHourPlaceholder').innerHTML = 'Choose hour&nbsp<span class="caret"></span>';
 	let list = document.getElementById('yourTeacherHour');
 	list.innerHTML = '';
 
@@ -85,7 +87,7 @@ let eliminateInvalidPeriods = (hours) => {
 		label.setAttribute('for', `hour${hour}`);
 		label.innerHTML = hour;
 
-		input.type = 'radio';
+		input.type = 'checkbox';
 		input.setAttribute('id', `hour${hour}`);
 		input.setAttribute('name', 'hour');
 		input.setAttribute('value', hour);
@@ -108,7 +110,7 @@ let buildTeacherThatHelped = () => {
 		label.setAttribute('for', `teacherHelped${teacher.name}`);
 		label.innerHTML = teacher.name;
 
-		input.type = 'radio';
+		input.type = 'checkbox';
 		input.setAttribute('id', `teacherHelped${teacher.name}`);
 		input.setAttribute('name', 'teacherThatHelped');
 		input.setAttribute('value', teacher.name);
