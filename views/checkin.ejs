@@ -2,8 +2,8 @@
 <script>
 	<%
 		teachers.forEach( (teacher) => {
-			let classesString = '';
-			let hoursString = '';
+			let classesString = '[';
+			let hoursString = '{';
 
 			teacher.classes.forEach( (_class) => {
 				classesString += `'${_class}',`;
@@ -17,20 +17,20 @@
 				hoursString += '],';
 			});
 
-			hoursString = hoursString.substring(0, hoursString.length - 1);
-			classesString = classesString.substring(0, classesString.length - 1);
+			hoursString = hoursString.substring(0, hoursString.length - 1) + '}';
+			classesString = classesString.substring(0, classesString.length - 1) + ']';
 	%>
-		addTeacher(new Teacher('<%- teacher.lastName %>', [<%- classesString %>], {<%- hoursString %>}));
+		addTeacher(new Teacher('<%- teacher.lastName %>', <%- classesString %>, <%- hoursString %>));
 	<% }); %>
 </script>
 
-<form method="POST">
+<form method="POST" class="hasJS">
 	<div class="container-fluid well">
 		<h2 class="text-center well">Student Information</h2>
 		<div>
 			<div class="col-md-8 col-md-offset-2 input-group">
 				<div class="input-group-addon" for="studentName">Name</div>
-				<input type="text" class="form-control" id="studentName" placeholder="Enter student name" />
+				<input type="text" class="form-control" id="studentName" name="studentName" placeholder="Enter student name" />
 			</div>
 			<br />
 			<div class="col-md-8 col-md-offset-2 input-group">
@@ -73,7 +73,7 @@
 						<li><input type="radio" id="lunchRadio" name="comingFrom" value="lunch" onclick="toggleStudyHallBox(false)"><label for="lunchRadio">Lunch</label></li>
 					</ul>
 				</div>
-				<input type="text" id="studyhallBox" class="input-group-addon" placeholder="Room Number">
+				<input type="text" id="studyhallBox" name="comingFromRoom" maxlength="3" class="input-group-addon" placeholder="Room Number">
 			</div>
 			<br />
 			<h2 class="text-center well">ARC Information</h2>
@@ -101,7 +101,6 @@
 						<li><input type="radio" id="hourInArc4b" name="hourInArc" value="4b"><label for="hourInArc4b">4b</label></li>
 						<li><input type="radio" id="hourInArc4c" name="hourInArc" value="4c"><label for="hourInArc4c">4c</label></li>
 						<li><input type="radio" id="hourInArc5a" name="hourInArc" value="5a"><label for="hourInArc5a">5a</label></li>
-						<li><input type="radio" id="hourInArc5b" name="hourInArc" value="5b"><label for="hourInArc5b">5b</label></li>
 						<li><input type="radio" id="hourInArc6" name="hourInArc" value="6"><label for="hourInArc6">6</label></li>
 						<li><input type="radio" id="hourInArc7" name="hourInArc" value="7"><label for="hourInArc7">7</label></li>
 					</ul>

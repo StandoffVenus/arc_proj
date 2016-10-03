@@ -53,11 +53,6 @@ Student.find(
 			throw err;
 
 		STUDENTS = students;
-
-		// After we grab all the students, clear the DB for later
-		students.forEach( (student) => {
-			student.remove();
-		});
 	}
 );
 
@@ -119,6 +114,10 @@ app.use(flash());
 
 // This method will do res.render with the template page so I don't have to repeat myself
 let renderPage = (model, req, res) => {
+	// Passing the fs package to the template page
+	model.file_system = file_system;
+
+	// If we don't have any errors
 	if (typeof model.errors === 'undefined')
 		model.errors = {};
 
@@ -136,15 +135,15 @@ let renderPage = (model, req, res) => {
 	res.render('template', model);
 }
 
-// For every single page
-app.use('*', (req, res, next) => {
+// For every single request
+app.use( (req, res, next) => {
 	// After every request, we will check if flash has a message for us to display
-	res.locals.success_msg = req.flash('success_msg');
-	res.locals.error_msg = req.flash('error_msg');
-	res.locals.error = req.flash('error');
+	res.locals.success_msg 	= req.flash('success_msg');
+	res.locals.error_msg 	= req.flash('error_msg');
+	res.locals.error 		= req.flash('error');
 
 	// This logs all requests a user makes
-	util.log(`Request to ${req.path} via ${req.method.toUpperCase()}`);
+	util.log(`Request to ${req.url} via ${req.method.toUpperCase()}`);
 	next();
 });
 
@@ -185,11 +184,19 @@ app.get('/checkin', (req, res) => {
 	);
 });
 
+// Check-in page - POST 
 app.post('/checkin', (req, res) => {
+	// Student information section
 	req.checkBody('studentName', 'The name field is required.').notEmpty();
 	req.checkBody('teacherName', 'No teacher was chosen.').notEmpty();
-	req.checkBody('')
-	req.check()
+	req.checkBody('teacherClass', 'No class was chosen.').notEmpty();
+	req.checkBody('teacherHour', 'No hour was chosen.').notEmpty();
+	req.checkBody('comingFrom', 'Invalid hour chosen.').notEmpty();
+	
+	// ARC information section
+	req.checkBody('helpedWith', 'Invalid selection for \"Helped with\" field.').notEmpty();
+	req.checkBody('hourInArc', 'Invalid hour in arc room.').notEmpty();
+	req.checkBody('teacherThatHelped', 'Invalid teacher to be helped by.').notEmpty();
 
 	if (req.validationErrors()) {
 		Teacher.find(
@@ -197,9 +204,6 @@ app.post('/checkin', (req, res) => {
 
 			},
 			(err, teachers) => {
-				if (err)
-					throw err;
-
 				renderPage(
 					{
 						errors: req.validationErrors(),
@@ -212,8 +216,157 @@ app.post('/checkin', (req, res) => {
 		);
 	}
 	else {
-		res.redirect('/');
-		req.flash('success_msg', `Successfully logged ${req.body.name} in.`);
+		if (req.body.comingFrom === 'studyhall') {
+			// Less repetition.
+			let comingFromRoom = req.body.comingFromRoom;
+
+			// Checking validity of the comingFromRoom field
+			if (typeof comingFromRoom === 'undefined' || isNaN(Number(comingFromRoom)) || comingFromRoom < 0) {
+				Teacher.find(
+					{
+
+					},
+					(err, teachers) => {
+						renderPage(
+							{
+								errors: {
+									'comingFromRoomError' : 'Coming from invalid room number.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+				);
+			}
+
+			Teacher.find(
+				{
+
+				},
+				(err, _teachers) => {
+					let teachers = {};
+
+					Object.keys(_teachers).forEach( (key) => {
+						teachers[_teachers[key].lastName] = _teachers[key];
+					});
+
+					if (err)
+						throw err;
+
+						// Checks for valid data
+					// Checking if the teacher chosen is a valid teacher
+					if (typeof teachers[req.body.teacherName] === 'undefined') {
+						renderPage(
+							{
+								errors: {
+									'teacherNameError' : 'Selected teacher does not exist.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+					// Checking if class is valid
+					else if (!teachers[req.body.teacherName].classes.includes(req.body.teacherClass)) {
+						renderPage(
+							{
+								errors: {
+									'teacherClassError' : 'Invalid class chosen for teacher.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+					// Checking if student chose a valid hour
+					else if (typeof teachers[req.body.teacherName].hours[req.body.teacherClass][req.body.teacherHour] === 'undefined') {
+						renderPage(
+							{
+								errors: {
+									'teacherHourError' : 'Invalid hour chosen for class.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+					else {
+						// Success in request.
+						req.flash('success_msg', `Successfully logged ${req.body.name} in.`);
+						res.redirect('/');
+					}
+				}
+			);
+		}
+		else {
+			Teacher.find(
+				{
+
+				},
+				(err, _teachers) => {
+					let teachers = {};
+
+					Object.keys(_teachers).forEach( (key) => {
+						teachers[_teachers[key].lastName] = _teachers[key];
+					});
+
+					if (err)
+						throw err;
+
+						// Checks for valid data
+					// Checking if the teacher chosen is a valid teacher
+					if (typeof teachers[req.body.teacherName] === 'undefined') {
+						renderPage(
+							{
+								errors: {
+									'teacherNameError' : 'Selected teacher does not exist.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+					// Checking if class is valid
+					else if (!teachers[req.body.teacherName].classes.includes(req.body.teacherClass)) {
+						renderPage(
+							{
+								errors: {
+									'teacherClassError' : 'Invalid class chosen for teacher.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+					// Checking if student chose a valid hour
+					else if (typeof teachers[req.body.teacherName].hours[req.body.teacherClass][req.body.teacherHour] === 'undefined') {
+						renderPage(
+							{
+								errors: {
+									'teacherHourError' : 'Invalid hour chosen for class.'
+								},
+								teachers: teachers
+							},
+							req,
+							res
+						);
+					}
+					else {
+						// Success in request.
+						req.flash('success_msg', `Successfully logged ${req.body.studentName} in.`);
+						console.log(res.locals);
+						res.redirect('/');
+					}
+				}
+			);
+		}
 	}
 });
 

@@ -87,9 +87,9 @@ let eliminateInvalidPeriods = (hours) => {
 		label.setAttribute('for', `hour${hour}`);
 		label.innerHTML = hour;
 
-		input.type = 'checkbox';
+		input.type = 'radio';
 		input.setAttribute('id', `hour${hour}`);
-		input.setAttribute('name', 'hour');
+		input.setAttribute('name', 'teacherHour');
 		input.setAttribute('value', hour);
 
 		item.appendChild(input);
