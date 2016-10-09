@@ -1,0 +1,44 @@
+<tr>
+  <th scope="row">
+    <%= entry.name %>
+  </th>
+  <td>
+    <%= entry.teacher %>
+  </td>
+  <td>
+    <%= entry.class %>
+  </td>
+  <td>
+    <%= entry.hour %>
+  </td>
+  <td>
+    <%= entry.comingFrom %>
+  </td>
+  <td>
+    <%= (typeof entry.studyHallRoom !== 'undefined') ?
+        entry.studyHallRoom :
+        'N/A'
+    %>
+  </td>
+  <td>
+    <ul>
+      <% for (let i = 0; i < entry.helpedWith.length; i++) { %>
+        <li>
+          <%= entry.helpedWith[i] %>
+        </li>
+      <% } %>
+    </ul>
+  </td>
+  <td>
+    <ul>
+      <% for (let i = 0; i < entry.helpedBy.length; i++) { %>
+        <li>
+          <%= entry.helpedBy[i] %>
+        </li>
+      <% } %>
+    </ul>
+  </td>
+  <td>
+    <%= entry.arcHour %>
+  </td>
+</tr>

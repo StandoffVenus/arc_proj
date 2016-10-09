@@ -5,7 +5,6 @@ let mongoose = require('mongoose'),
 		lastName: String,
 		classes: Array,
 		hours: Object,
-		gender: Number,
 		email: String,
 		homeroom: Number,
 		extension: Number

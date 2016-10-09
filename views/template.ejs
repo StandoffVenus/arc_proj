@@ -9,34 +9,22 @@
 			<style type='text/css'>
 				.hasJS { display: none; }
 			</style>
-			<h2 class="well text-center">
+			<h2 class="text-xs-center">
 				If your browser does not support JavaScript, or you have turned it off, this domain will not function properly. Please enable it to access all the pages on this domain.
 			</h2>
 		</noscript>
 		<div class="hasJS">
-			<% if (success_msg.length > 0) { %>
-				<div class="bg-success">
-					<%= success_msg %>
-				</div>
-			<% } %>
-			<% if (error_msg.length > 0) { %>
-				<div class="bg-warning">
-					<%= error_msg %>
-				</div>
-			<% } %>
-			<% if (error.length > 0) { %>
-				<div class="bg-danger">
-					<%= error %>
-				</div>
-			<% } %>
 			<br />
 			<% let keys = Object.keys(errors); %>
 			<% if (keys.length > 0) { %>
-				<div class="well">
-					<h2 class="text-danger text-center">Error filling out fields!</h2>
-					<ul>
+				<div class="card">
+					<h2 class="text-danger card-header">Error!</h2>
+					<div class="card-block">
+						It appears there were errors completing that request!
+					</div>
+					<ul class="list-group list-group-flush">
 						<% for (let i = 0; i < keys.length; i++) { %>
-							<li class="text-danger text-center hidden-list"><strong><%= errors[keys[i]].msg %></strong></li>
+							<li class="text-warning list-group-item"><strong><%= errors[keys[i]].msg %></strong></li>
 						<% } %>
 					</ul>
 				</div>
@@ -46,6 +34,18 @@
 
 			<% // Implementing passed page %>
 			<%- include( page ); %>
+
+			<% if (showHome) { %>
+				<br />
+				<div class="row container-fluid">
+					<a href="/index" class="btn btn-success col-xs-4 offset-xs-4">
+						<h3 class="text-xs-center">
+							<span class="glyphicon glyphicon-home"></span>
+							&nbspHome
+						</h3>
+					</a>
+				</div>
+			<% } %>
 		</div>
 	</body>
 </html>

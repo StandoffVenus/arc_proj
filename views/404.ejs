@@ -4,12 +4,19 @@
 		<% // Styles and JS %>
 		<%- include('universalhead') %>
 	</head>
-	<body style="background: #06A;">
+	<body>
 		<br />
-		<div class="jumbotron container" style="border-radius: 2em;">
-			<h1>404!</h1>
-			<br />
-			<h3>Sorry! We couldn't reach the page you were looking for!</h3>
+		<div class="col-xs-8 offset-xs-2">
+			<div class="card">
+				<h1 class="card-header text-danger text-xs-center">404!</h1>
+				<br />
+				<div class="card-block text-xs-center">
+					<h3 class="text-info">Sorry! We couldn't reach the page you were looking for!</h3>
+					<br />
+					<h3 class="text-info">But here's what we can show you instead:</h3>
+					<img alt="Looks like we can't even show you that!" src="/static/img/prattDance.gif">
+				</div>
+			</div>
 		</div>
 	</body>
 </html>

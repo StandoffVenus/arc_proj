@@ -5,10 +5,11 @@ let mongoose = require('mongoose'),
 		name: String,
 		teacher: String,
 		class: String,
-		hours: Array,
+		hour: Array,
 		comingFrom: String,
+		studyHallRoom: Number,
 		helpedWith: Array,
-		helpedBy: String,
+		helpedBy: Array,
 		arcHour: String
 	});
 

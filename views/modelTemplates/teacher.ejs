@@ -1,27 +1,36 @@
 <tr>
-	<th><%= (teacher.gender === 0) ? `Mr. ${teacher.lastName}` : `Mrs. ${teacher.lastName}`; %></th>
-	<th>
-		<% for (let i = 0; i < teacher.classes.length; i++) { %>
-			<%= teacher.classes[i] %><br />
-		<% } %>
+	<th scope="row">
+		<a href="<%= `http://www.masd.k12.wi.us/faculty/${entry.email.substring(0, 7)}/` %>" class="text-info">
+			<%= entry.lastName %>
+		</a>
 	</th>
-	<th>
-		<% for (let i = 0; i < teacher.classes.length; i++) { %>
-			<%= teacher.classes[i] %><br />
+	<td>
+		<% for (let i = 0; i < entry.classes.length; i++) { %>
+			<li>
+				<%= entry.classes[i] %>
+				<%= (i < entry.classes.length - 1) ?
+							',' :
+							''; %>
+			</li>
+		<% } %>
+	</td>
+	<td>
+		<% for (let i = 0; i < entry.classes.length; i++) { %>
+			<%= entry.classes[i] %><br />
 			<ul>
-				<% for (let j = 0; j < teacher.hours[teacher.classes[i]].length; j++) { %>
-					<li><%= teacher.hours[teacher.classes[i]][j] %></li>
+				<% for (let j = 0; j < entry.hours[entry.classes[i]].length; j++) { %>
+					<li><%= entry.hours[entry.classes[i]][j] %></li>
 				<% } %>
 			</ul>
 		<% } %>
-	</th>
-	<th>
-		<%= teacher.email %>
-	</th>
-	<th>
-		<%= teacher.homeroom %>
-	</th>
-	<th>
-		<%= teacher.extension %>
-	</th>
+	</td>
+	<td>
+		<%= entry.email %>
+	</td>
+	<td>
+		<%= entry.homeroom %>
+	</td>
+	<td>
+		<%= entry.extension %>
+	</td>
 </tr>

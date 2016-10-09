@@ -19,7 +19,14 @@ let buildTeachersBox = () => {
 		let label = document.createElement('label');
 
 		label.setAttribute('for', `mathTeacher${index}`);
-		label.innerHTML = teacher.name.substring(0, 1).toUpperCase() + teacher.name.substring(1) + '&nbsp';
+		label.innerHTML = teacher
+												.name
+													.substring(0, 1)
+												.toUpperCase() +
+											teacher
+												.name
+													.substring(1) +
+											'&nbsp';
 
 		input.type = 'radio';
 		input.setAttribute('id', `mathTeacher${index}`);
@@ -27,8 +34,13 @@ let buildTeachersBox = () => {
 		input.setAttribute('value', teacher.name);
 
 		input.addEventListener('click', () => {
-			document.getElementById('yourTeacherClassesPlaceholder').innerHTML = 'Choose class&nbsp<span class="caret"></span>';
-			document.getElementById('yourTeacherHourPlaceholder').innerHTML = 'Choose hour(s)&nbsp<span class="caret"></span>';
+			document
+				.getElementById('yourTeacherClassesPlaceholder')
+					.innerHTML = 'Choose class&nbsp';
+			document
+				.getElementById('yourTeacherHourPlaceholder')
+					.innerHTML = 'Choose hour(s)&nbsp';
+
 			updateClassChoice(index);
 		});
 
@@ -41,9 +53,15 @@ let buildTeachersBox = () => {
 
 let toggleStudyHallBox = (bool) => {
 	if (bool)
-		document.getElementById('studyhallBox').style.display = 'inline-block';
+		document
+			.getElementById('studyhallBox')
+				.style
+			.display = 'inline-block';
 	else
-		document.getElementById('studyhallBox').style.display = 'none';
+		document
+			.getElementById('studyhallBox')
+				.style
+			.display = 'none';
 }
 
 let updateClassChoice = (index) => {
@@ -64,7 +82,7 @@ let updateClassChoice = (index) => {
 		input.setAttribute('value', _class);
 
 		input.addEventListener('click', () => {
-			document.getElementById('yourTeacherHourPlaceholder').innerHTML = 'Choose hour(s)&nbsp<span class="caret"></span>';
+			document.getElementById('yourTeacherHourPlaceholder').innerHTML = 'Choose hour(s)&nbsp';
 			eliminateInvalidPeriods(ALL_TEACHERS[index].hours[_class])
 		});
 
