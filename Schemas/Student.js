@@ -10,7 +10,8 @@ let mongoose = require('mongoose'),
 		studyHallRoom: Number,
 		helpedWith: Array,
 		helpedBy: Array,
-		arcHour: String
+		arcHour: String,
+		comments: String,
 	});
 
 module.exports = mongoose.model('Student', StudentSchema);

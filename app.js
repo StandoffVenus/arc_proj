@@ -469,7 +469,8 @@ app.post('/checkin', (req, res) => {
 									studyHallRoom : comingFromRoom,
 									helpedWith 		: req.body.helpedWith,
 									helpedBy 			: req.body.teacherThatHelped,
-									arcHour 			: req.body.hourInArc
+									arcHour 			: req.body.hourInArc,
+									comments			: req.body.comments
 								}
 							),
 							(err, resultantStudent) => {
@@ -577,7 +578,8 @@ app.post('/checkin', (req, res) => {
 									comingFrom 	: req.body.comingFrom,
 									helpedWith 	: req.body.helpedWith,
 									helpedBy 		: req.body.teacherThatHelped,
-									arcHour 		: req.body.hourInArc
+									arcHour 		: req.body.hourInArc,
+									comments		: req.body.comments
 								}
 							),
 							(err, resultantStudent) => {
