@@ -1,6 +1,9 @@
-<tr>
+<tr> 
   <th scope="row">
-    <%= entry.name %>
+    <%= entry.lastName %>
+  </th>
+  <th scope="row">
+    <%= entry.firstName %>
   </th>
   <td>
     <%= entry.teacher %>
@@ -12,7 +15,7 @@
     <%= entry.hour %>
   </td>
   <td>
-    <%= entry.comingFrom %>
+    <%= englishCapitalize(entry.comingFrom) %>
   </td>
   <td>
     <%= (typeof entry.studyHallRoom !== 'undefined') ?
@@ -24,7 +27,7 @@
     <ul>
       <% for (let i = 0; i < entry.helpedWith.length; i++) { %>
         <li>
-          <%= entry.helpedWith[i] %>
+          <%= englishCapitalize(entry.helpedWith[i]) %>
         </li>
       <% } %>
     </ul>
@@ -33,7 +36,7 @@
     <ul>
       <% for (let i = 0; i < entry.helpedBy.length; i++) { %>
         <li>
-          <%= entry.helpedBy[i] %>
+          <%= englishCapitalize(entry.helpedBy[i]) %>
         </li>
       <% } %>
     </ul>

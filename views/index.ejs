@@ -1,32 +1,61 @@
-<div class="jumbotron" style="background: #AAAAAA; color: #FFFFFF">
-  <h1 class="text-center">
-    <% let name = path.basename(__filename, '.ejs'); %>
-    <%= name.substring(0, 1).toUpperCase() +
-          name.substring(1).toLowerCase();
-    %>
+<script src="static/index.js"></script>
+<div class="alert alert-info">
+  <h1 class="text-xs-center">
+    Welcome!
   </h1>
 </div>
-<div>
-  <table class="table table-bordered table-sm table-inverse">
-    <thead>
-      <tr>
-        <% for (let i = 0; i < studentPaths.length; i++) { %>
-          <th>
-            <%= studentPaths[i]
-                  .substring(0, 1)
-                  .toUpperCase() +
-
-                studentPaths[i]
-                  .substring(1);
-            %>
+<div class="row">
+  <div class="col-xs-3 text-xs-center">
+    <a href="/checkin" class="btn btn-info col-xs-12">
+      <h3>Check in</h3>
+    </a>
+    &nbsp
+    <button type="button" onclick="sendAttendenceConfirm();" class="btn btn-info col-xs-12">
+      <h3>Send attendence</h3>
+    </button>
+    &nbsp
+    <a href="/collections/show" class="btn btn-info col-xs-12">
+      <h3>Collections</h3>
+    </a>
+  </div>
+  <div class="col-xs-9">
+    <table class="table table-bordered table-sm table-inverse">
+      <thead>
+        <tr>
+          <th width="40%">
+            Last name
           </th>
-        <% } %>
-      </tr>
-    </thead>
-    <tbody>
-      <% for (let i = 0; i < students.length; i++) { %>
-        <%- include('modelTemplates/student.ejs', { entry: students[i] }) %>
-      <% } %> 
-    </tbody>
-  </table>
+          <th width="40%">
+            First name
+          </th>
+          <th>
+            Options
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let studentsKeys = Object.keys(students); %>
+        <% for (let i = 0; i < studentsKeys.length; i++) { %>
+          <tr>
+            <th>
+              <%=
+                students[studentsKeys[i]].lastName;
+              %>
+            </th>
+            <th>
+              <%=
+                students[studentsKeys[i]].firstName;
+              %>
+            </th>
+            <th>
+              <a href="/checkout/<%= students[studentsKeys[i]].id %>"
+              class="btn btn-info col-xs-12">
+                Check out
+              </a>
+            </th>
+          </tr>
+        <% } %> 
+      </tbody>
+    </table>
+  </div>
 </div>

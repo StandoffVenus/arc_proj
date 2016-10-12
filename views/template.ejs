@@ -4,7 +4,7 @@
 		<% // All the styles and JS we'll need %>
 		<%- include('universalhead.ejs') %>
 	</head>
-	<body class="container">
+	<body class="container-fluid">
 		<noscript>
 			<style type='text/css'>
 				.hasJS { display: none; }
@@ -32,20 +32,10 @@
 				<br />
 			<% } %>
 
-			<% // Implementing passed page %>
-			<%- include( page ); %>
-
-			<% if (showHome) { %>
-				<br />
-				<div class="row container-fluid">
-					<a href="/index" class="btn btn-success col-xs-4 offset-xs-4">
-						<h3 class="text-xs-center">
-							<span class="glyphicon glyphicon-home"></span>
-							&nbspHome
-						</h3>
-					</a>
-				</div>
-			<% } %>
+			<div class="container-fluid">
+				<% // Implementing passed page %>
+				<%- include( page ); %>
+			</div>
 		</div>
 	</body>
 </html>

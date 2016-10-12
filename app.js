@@ -2,7 +2,10 @@
 global.BACKOFF_TIME = 2000;
 
 	// Packages and variable declaration
-let mongo 						= require('mongodb'), 
+let async  						= require('async'),
+		// async allows us to easily use functions asynchronously
+
+		mongo 						= require('mongodb'), 
 		// This is the DB - it is a non-relation DB called MongoDB
 
 		mongoose 					= require('mongoose'), 
@@ -56,7 +59,7 @@ let mongo 						= require('mongodb'),
 									:	3000,
 		// Global port to communicate with localhost on
 
-		STUDENTS = [],
+		STUDENTS = {},
 		// Students checked in
 
 		// Spinning off a child process to open up Mongo for communication
@@ -81,7 +84,7 @@ if (user_argv.teachers) {
 mongoose.connect(
 	'mongodb://localhost/app',
 	(err) => {
-		// Exponential backoff in case of error
+		// Exponential backoff in case of total inability to connect
 		if (err) {
 			util.log('Error connecting to the DB.');
 
@@ -105,8 +108,10 @@ db.on('error', (err) => {
 	mongoose.connect('mongodb://127.0.0.1/app');
 });
 
-let Student = require('./Schemas/Student.js'), 	// Student schema
-		Teacher = require('./Schemas/Teacher.js'); 	// Teacher schema
+// Schemas
+let Student = require('./Schemas/Student.js'),
+		Record 	= require('./Schemas/Record.js'),
+		Teacher = require('./Schemas/Teacher.js');
 
 // Getting all previously logged-in students
 Student.find(
@@ -117,7 +122,18 @@ Student.find(
 		if (err)
 			throw err;
 
-		STUDENTS = students || [];
+		async.each(
+			students,
+			(student, callback) => {
+				STUDENTS[student.id] = student;
+			},
+			(err) => {
+				if (err) {
+					util.log(`Encountered error adding student(s).`);
+					util.log(`${err}`);
+				}
+			}
+		);
 	}
 );
 
@@ -193,10 +209,6 @@ let renderPage = (model, req, res) => {
 	else
 		model.page = process.cwd() + '\\views' + model.page;
 
-	// Checks to see if we should display the "home" button
-	if (typeof model.showHome === 'undefined')
-		model.showHome = true;
-
 	// Render 'template.ejs' with our new model.
 	res.render('template', model);
 }
@@ -205,6 +217,8 @@ let renderPage = (model, req, res) => {
 app.use( (req, res, next) => {
 	// Giving pages the context of the path module
 	res.locals.path = path;
+	// Giving pages mongoose models
+	res.locals.mongoose = mongoose;
 	
 	// This logs all requests a user makes
 	util.log(`Request to ${req.url} via ${req.method.toUpperCase()}`);
@@ -220,15 +234,16 @@ app.get('/', (req, res) => {
 app.get('/index', (req, res) => {
 	renderPage(
 		{
-			students: STUDENTS,
-			studentPaths: Object.keys(
-				Student.schema.obj
-			),
-			showHome: false
+			students: STUDENTS
 		},
 		req,
 		res
 	);
+});
+
+// Redirect to collections
+app.get('/collections/', (req, res) => {
+	res.redirect('/collections/show');
 });
 
 // For all requests for collections
@@ -281,17 +296,15 @@ app.get('/collections/:collection', (req, res) => {
 			}
 		);
 	}
-	else if (typeof req.params.collection !== 'undefined') {
+	else {
 		renderPage(
 			{
+				collections: Object.keys(db.collections),
 				page: '/collections'
 			},
 			req,
 			res
 		);
-	}
-	else {
-		res.redirect('/collections/show');
 	}
 });
 
@@ -318,9 +331,14 @@ app.get('/checkin', (req, res) => {
 
 // Check-in page - POST 
 app.post('/checkin', (req, res) => {
+	console.log(req.body);
+
 	// Student information section
 	req
-		.checkBody('studentName', 'The name field is required.')
+		.checkBody('studentFirstName', 'You must include a first name.')
+		.notEmpty();
+	req
+		.checkBody('studentLastName', 'You must include a last name.')
 		.notEmpty();
 	req
 		.checkBody('teacherName', 'No teacher was chosen.')
@@ -461,7 +479,8 @@ app.post('/checkin', (req, res) => {
 						Student.create(
 							new Student(
 								{
-									name 					: req.body.studentName,
+									lastName 			: req.body.studentLastName,
+									firstName 		: req.body.studentFirstName,
 									teacher 			: req.body.teacherName,
 									class 				: req.body.teacherClass,
 									hour 					: req.body.teacherHour,
@@ -477,8 +496,29 @@ app.post('/checkin', (req, res) => {
 								if (err)
 									throw err;
 
-								STUDENTS.push(resultantStudent);
-								util.log(`Added ${resultantStudent.name}.`);
+								STUDENTS[resultantStudent.id] = resultantStudent;
+								util.log('Added ' +
+													resultantStudent.firstName +
+													' ' +
+													resultantStudent.lastName
+												);
+
+								// Save the check in
+								Record.create(
+									new Record(
+										{
+											time: Date.now(),
+											student: resultantStudent
+										}
+									),
+									(err, resultantRecord) => {
+										if (err)
+											throw err;
+
+										util.log('Successively saved check in to records.');
+									}
+								);
+
 								res.redirect('/');
 							}
 						);
@@ -571,7 +611,8 @@ app.post('/checkin', (req, res) => {
 						Student.create(
 							new Student(
 								{
-									name 				: req.body.studentName,
+									lastName 		: req.body.studentLastName,
+									firstName 	: req.body.studentFirstName,
 									teacher 		: req.body.teacherName,
 									class 			: req.body.teacherClass,
 									hour 				: req.body.teacherHour,
@@ -586,8 +627,29 @@ app.post('/checkin', (req, res) => {
 								if (err)
 									throw err;
 
-								STUDENTS.push(resultantStudent);
-								util.log(`Added ${resultantStudent.name}.`);
+								STUDENTS[resultantStudent.id] = resultantStudent;
+								util.log('Added ' +
+													resultantStudent.firstName +
+													' ' +
+													resultantStudent.lastName
+												);
+
+								// Save the check in
+								Record.create(
+									new Record(
+										{
+											time: Date.now(),
+											student: resultantStudent
+										}
+									),
+									(err, resultantRecord) => {
+										if (err)
+											throw err;
+
+										util.log('Successively saved check in to records.');
+									}
+								);
+
 								res.redirect('/');
 							}
 						);
@@ -599,18 +661,59 @@ app.post('/checkin', (req, res) => {
 });
 
 // checkout
-app.post('/checkout/:id', (req, res) => {
-	// Checkout the student from the STUDENT list
-	// Do not remove them from actual students collection
-	// Redirect to index
+app.get('/checkout/:id', (req, res) => {
+	// Find specific student
+	Student.find(
+		{
+			id: req.params.id
+		},
+		(err, student) => {
+			// Attempt to delete student
+			try {
+				if (err)
+					throw err;
+
+				// If the student exists in the user-presented students
+				// and the student exists in the DB
+				if (typeof STUDENTS[req.params.id] !== 'undefined'
+						&& typeof student !== 'undefined') {
+					// Delete from user students
+					delete STUDENTS[req.params.id];
+					util.log(`Deleted student at id ${req.params.id}.`);
+				}
+				else
+					throw new Error(`Invalid student id ${req.params.id}.`);
+			}
+			catch (err) {
+				util.log(`Failed to remove student ${req.body.id}.`);
+				util.log(`${err}`);
+			}
+
+			res.redirect('/');
+		}
+	);
 });
 
-// sendattendence
-app.post('/checkoutall', (req, res) => {
-
+app.get('/sendattendence', (req, res) => {
 	// Send email of with the attendence of all students in DB
-	// Clear students collection
-	// Redirect to index
+	
+	// "Check out" all the students
+	Student
+		.find()
+		.remove(
+			{
+
+			},
+			(err, results) => {
+				util.log(`Removed ${results.result.n} students.`);
+			}
+		);
+
+	// Reset user-presented STUDENTS
+	STUDENTS = {};
+
+	// Back to the index page
+	res.redirect('/');
 });
 
 // 404
@@ -628,4 +731,16 @@ app.listen(GLOBAL_PORT, (err) => {
 		util.log(`Server running on ${GLOBAL_PORT}.`);
 	else
 		throw new Error(err);
+});
+
+// Catching possible RangeError exception (Mongo bug)
+process.on('uncaughtexception', (err) => {
+	if (err instanceof RangeError) {
+		util.log('Range error occurred!');
+		util.log(`${err}.`);
+	}
+	else {
+		util.log(`Don't know what happened, but...\n\n`);
+		throw err;
+	}
 });

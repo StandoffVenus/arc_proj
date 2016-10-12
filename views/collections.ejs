@@ -1,38 +1,102 @@
-<% if (typeof entries === 'undefined') { %>
-	Display collections
-<% } else { %>
-	<div class="jumbotron" style="background: #AAAAAA; color: #FFFFFF">
-		<h1 class="text-xs-center">
-			<%= schemaName + 's' %>
-		</h1>
-	</div>
-	<div>
-		<table class="table table-bordered table-striped table-sm table-inverse">
-			<thead>
-				<tr>
-					<% for (let i = 0; i < paths.length; i++) { %>
-						<th>
-							<%= paths[i]
-										.substring(0, 1)
-										.toUpperCase() +
+<%
+	let splitAtCapitals = (str) => {
+    return str
+            .split(/(?=[A-Z])/)
+            .join(" ");
+  }
 
-									paths[i]
-										.substring(1);
-							%>
-						</th>
-					<% } %>
-				</tr>
-			</thead>
-			<tbody>
-				<% for (let i = 0; i < entries.length; i++) { %>
-					<%- 
-						include(
-							`modelTemplates/${schemaName.toLowerCase()}.ejs`,
-							{ entry: entries[i] }
-						) 
-					%>
-				<% } %>	
-			</tbody>
-		</table>
+  let englishCapitalize = (str) => {
+    let newStr = splitAtCapitals(str);
+
+    return newStr
+            .substring(0, 1)
+            .toUpperCase() +
+
+          newStr
+            .substring(1)
+            .toLowerCase();
+  } 
+%>
+
+<% if (typeof entries === 'undefined') { %>
+	<div class="card-deck">
+		<div class="card">
+			<div class="card-header">
+				<div class="container">
+					<h1 class="col-xs-2 pull-xs-left">
+						Collections
+					</h1>
+					<a href="/" class="btn btn-success col-xs-4 pull-xs-right">
+						<h3>
+							<span class="glyphicon glyphicon-home"></span>
+							&nbspHome
+						</h3>
+					</a>
+				</div>
+			</div>
+			<div class="card-block">
+				<% for (let i = 0; i < collections.length; i += 2) { %>
+					<div class="card-block">
+						<a href="<%= collections[i] %>" class="col-xs-5 pull-xs-left btn btn-warning">
+							<h4><%= englishCapitalize(collections[i]) %></h4>
+						</a>
+						<% if (i + 1 < collections.length) { %>
+							<a href="<%= collections[i + 1] %>" class="col-xs-5 pull-xs-right btn btn-warning">
+								<h4><%= englishCapitalize(collections[i + 1]) %></h4>
+							</a>
+						<% } %>
+					</div>
+				<% } %>
+			</div>
+			<br />
+		</div>
+	</div>
+<% } else { %>
+	<div class="card">
+		<div class="card-header">
+			<h1 class="col-xs-2 pull-xs-left">
+				<%= schemaName + 's' %>
+			</h1>
+			<a href="/collections/" class="btn btn-success col-xs-4 pull-xs-right">
+				<h3>
+					<span class="glyphicon glyphicon-circle-arrow-left"></span>
+					&nbspBack
+				</h3>
+			</a>
+		</div>
+		<div class="card-block">
+			<table class="table table-striped thead-inverse table-hover">
+				<thead>
+					<tr>
+						<% for (let i = 0; i < paths.length; i++) { %>
+							<th class="text-xs-center">
+								<% let currentPath = splitAtCapitals(paths[i]); %>
+								<%= currentPath
+											.substring(0, 1)
+											.toUpperCase() +
+
+										currentPath
+											.substring(1);
+								%>
+							</th>
+						<% } %>
+					</tr>
+				</thead>
+				<tbody>
+					<% for (let i = 0; i < entries.length; i++) { %>
+						<%- 
+							include(
+								`modelTemplates/${schemaName.toLowerCase()}.ejs`,
+								{
+									entry: entries[i],
+									splitAtCapitals: splitAtCapitals,
+									englishCapitalize: englishCapitalize
+								}
+							) 
+						%>
+					<% } %>	
+				</tbody>
+			</table>
+		</div>
 	</div>
 <% } %>
