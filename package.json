@@ -20,6 +20,7 @@
     "express-validator": "^2.20.10",
     "google-auth-library": "^0.9.8",
     "googleapis": "^13.0.0",
+    "js-base64": "^2.1.9",
     "jsonfile": "^2.4.0",
     "minimist": "^1.2.0",
     "mongodb": "^2.2.10",
