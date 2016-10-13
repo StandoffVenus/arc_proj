@@ -1,0 +1,26 @@
+{
+  "_id": "57f3daee56ad79170060f0e2",
+  "lastName": "Mack",
+  "hours": {
+    "Exploring Computer Science": [
+      "6"
+    ],
+    "Operating Systems And Servers": [
+      "3"
+    ],
+    "Geometry": [
+      "1",
+      "2",
+      "4c/5a"
+    ]
+  },
+  "email": "mackco@masd.k12.wi.us",
+  "homeroom": 268,
+  "extension": 25268,
+  "__v": 0,
+  "classes": [
+    "Geometry",
+    "Operating Systems And Servers",
+    "Exploring Computer Science"
+  ]
+}

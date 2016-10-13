@@ -1,0 +1,27 @@
+{
+  "_id": "57f3daee56ad79170060f0dc",
+  "lastName": "Dettlaff",
+  "hours": {
+    "AP Calculus AB": [
+      "3",
+      "4a/4b",
+      "6"
+    ],
+    "Honors Advanced Algebra": [
+      "2",
+      "7"
+    ],
+    "FST": [
+      "1"
+    ]
+  },
+  "email": "dettlro@masd.k12.wi.us",
+  "homeroom": 279,
+  "extension": 25279,
+  "__v": 0,
+  "classes": [
+    "FST",
+    "Honors Advanced Algebra",
+    "AP Calculus AB"
+  ]
+}

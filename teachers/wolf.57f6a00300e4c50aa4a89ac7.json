@@ -1,0 +1,25 @@
+{
+  "_id": "57f6a00300e4c50aa4a89ac7",
+  "__v": 0,
+  "lastName": "Wolf",
+  "hours": {
+    "AP Calculus AB": [
+      "1",
+      "4a/4b"
+    ],
+    "AP Calculus BC": [
+      "2"
+    ],
+    "Algebra 1": [
+      "5"
+    ]
+  },
+  "email": "wolfje@masd.k12.wi.us",
+  "homeroom": 275,
+  "extension": 25275,
+  "classes": [
+    "AP Calculus AB",
+    "AP Calculus BC",
+    "Algebra 1"
+  ]
+}
