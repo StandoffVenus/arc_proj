@@ -4,8 +4,6 @@ Simple project in Node.js that replaces our current attendance system. Lots of d
 
 ## Commands
 
----
-
 ### generate
 
 Creates a list of teacher files from the entries found in the DB
