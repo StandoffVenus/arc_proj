@@ -211,7 +211,7 @@ let OAuth2 = googleapi.auth.OAuth2,
     OAuth2Client,
     gmail;
 
-file_system.readFile(
+/* file_system.readFile(
   // Read in our project's OAuth2 information from a file
 	`${__dirname}/credentials/client_secret.json`,
 	(err, data) => {
@@ -257,7 +257,7 @@ file_system.readFile(
 			}
 		);
 	}
-);
+); */
 
 // Creating the "server" object
 let app = express();
