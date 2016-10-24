@@ -1,7 +1,20 @@
+/* TODO:
+	- Change student file to point at shared folder
+	- Email teachers on checkin/checkout
+	- Allow users to edit DB's
+	- Spruce up code for /checkin POST
+
+	[Later tasks]
+	- Trim up local modules
+	- Remove modules from GitHub
+	- Remove teachers from GitHub
+	- Trim up public folder
+*/
+
 "use strict";
 
   // Packages and variable declaration
-let async             = require('async'),
+const async           = require('async'),
     // async allows us to easily use functions asynchronously
 
     base64            = require('js-base64').Base64,
@@ -47,7 +60,7 @@ let async             = require('async'),
 
     updateTeachers    = require('./teachers/updateTeachers.js'),
     generateTeachers	= require('./teachers/generateTeachers.js'),
-
+    // Scripts for command-line arguments
 
     Schema = mongoose.Schema,
     // Schema allows you to create models for mongoose and the DB you're using 
@@ -64,27 +77,28 @@ let async             = require('async'),
                   :  56500,
     // Global port to communicate with localhost on
 
-    attendence = [
-     	0,
-      0
-    ],
-    // Array where
-    // [0] = Amount of time Send Attendence button was pressed
-    // [1] = Time since the button was pressed 3 times
+    STUDENTS_FILE_PATH = `${__dirname}/students.txt`;
+    // Where we write and update the students file
 
-    STUDENTS = {},
+	// Changing variables
+let STUDENTS = {},
     // Students checked in
 
-    // Spinning off a child process to open up Mongo for communication
-    mongoShell = child_process.exec(
-      'mongod',
-      {
-        // Relocate to the folder containing mongod.exe
-        cwd: (typeof process.env.MONGO_LOC !== 'undefined')
-              ? process.env.MONGO_LOC
-              : 'C:/Program Files/MongoDB/Server/3.2/bin/'
-      }
-    );
+    studentFile = new (require('./studentWriter.js'))(STUDENTS_FILE_PATH),
+    // Writes to our student file for us
+
+    // Schemas
+		Student = require('./Schemas/Student.js'),
+    Record  = require('./Schemas/Record.js'),
+    Teacher = require('./Schemas/Teacher.js');
+
+// Spinning off a child process to open up Mongo for communication
+let mongoShell = child_process.exec('mongod', // Open the Mongo connection
+	{
+		// Relocate to the folder containing mongod.exe
+		cwd: 'C:/Program Files/MongoDB/Server/3.2/bin/'
+	}
+);
 
 // Command line args
 if (user_argv.generate) {
@@ -107,19 +121,24 @@ mongoose.connect(
       // Try to use a local IP instead of localhost (usually works)
     	util.log('Retrying with local IP.');
 
-      mongoose.connect(
-      	'mongodb://127.0.0.1/app',
-      	(err, time) => {
-      		if (err) {
-      			util.log('Failed with local IP.');
-      			throw err;
-					}
+    	setTimeout(
+    		() => {
+		      mongoose.connect(
+		      	'mongodb://127.0.0.1/app',
+		      	(err) => {
+		      		if (err) {
+		      			util.log('Failed with local IP.');
+		      			throw err;
+							}
 
-					util.log('Succeeded in connecting to ' +
-                      mongoose.connection.host +
-                      '\n');
-      	}
-      );
+							util.log('Succeeded in connecting to ' +
+		                      mongoose.connection.host +
+		                      '\n');
+		      	}
+		      );
+		    },
+		    5000
+		  );
     }
     else
     	util.log(`Succeeded in connecting to ${mongoose.connection.host}.\n`);
@@ -129,14 +148,36 @@ mongoose.connect(
 let db = mongoose.connection; // Initialize db with mongoose connection
 
 // Try to connect locally instead incase of loss of connection
-db.on('error', (err) => {
-  mongoose.connect('mongodb://127.0.0.1/app');
-});
+db.on(
+	'error',
+	(err) => {
+		if (err) {
+			console.log('');
+			util.log(`DB encountered error, presumably with connection.`);
 
-// Schemas
-let Student = require('./Schemas/Student.js'),
-    Record   = require('./Schemas/Record.js'),
-    Teacher = require('./Schemas/Teacher.js');
+			setTimeout(
+				() => {
+				  mongoose.connect(
+				  	'mongodb://127.0.0.1/app',
+				  	(err) => {
+				  		if (err) {
+				  			util.log('Failed with local IP.');
+				  			throw err;
+							}
+
+							util.log('Succeeded in connecting to ' +
+				                  mongoose.connection.host +
+				                  '\n');
+				  	}
+				  );
+				},
+				5000
+			);
+		}
+		else
+    	util.log(`Succeeded in recovering from connection error.\n`);
+	}
+);
 
 // Getting all previously logged-in students
 Student.find(
@@ -161,6 +202,9 @@ Student.find(
     );
   }
 );
+
+// Check if file needs to be updated
+studentFile.needsRewrite();
 
 // Setting up Gmail and Google's OAuth2
 let OAuth2 = googleapi.auth.OAuth2,
@@ -307,24 +351,9 @@ app.get('/', (req, res) => {
 
 // Index page
 app.get('/index', (req, res) => {
-  let showAttendence = true;
-
-  if (attendence[0] >= 3) {
-    // If it has been 10 minutes since the last submit
-    if (Date.now() - attendence[1] < 1000*60*10)
-      showAttendence = false;
-  }
-  else {
-    attendence[0]++;
-
-    if (attendence[0] === 3)
-      attendence[1] = Date.now();
-  }
-
   renderPage(
     {
       students: STUDENTS,
-      showAttendence: showAttendence
     },
     req,
     res
@@ -421,8 +450,6 @@ app.get('/checkin', (req, res) => {
 
 // Check-in page - POST 
 app.post('/checkin', (req, res) => {
-  console.log(req.body);
-
   // Student information section
   req
     .checkBody('studentFirstName', 'You must include a first name.')
@@ -569,15 +596,15 @@ app.post('/checkin', (req, res) => {
             Student.create(
               new Student(
                 {
-                  lastName       : req.body.studentLastName,
+                  lastName      : req.body.studentLastName,
                   firstName     : req.body.studentFirstName,
                   teacher       : req.body.teacherName,
                   class         : req.body.teacherClass,
-                  hour           : req.body.teacherHour,
-                  comingFrom     : req.body.comingFrom,
-                  studyHallRoom : comingFromRoom,
-                  helpedWith     : req.body.helpedWith,
-                  helpedBy       : req.body.teacherThatHelped,
+                  hour          : req.body.teacherHour,
+                  comingFrom    : req.body.comingFrom,
+                  studyHallRoom	: comingFromRoom,
+                  helpedWith    : req.body.helpedWith,
+                  helpedBy      : req.body.teacherThatHelped,
                   arcHour       : req.body.hourInArc,
                   comments      : req.body.comments
                 }
@@ -592,6 +619,9 @@ app.post('/checkin', (req, res) => {
                           ' ' +
                           resultantStudent.lastName
                         );
+
+                // Add student to file
+                studentFile.add(resultantStudent);
 
                 // Save the check in
                 Record.create(
@@ -701,14 +731,14 @@ app.post('/checkin', (req, res) => {
             Student.create(
               new Student(
                 {
-                  lastName     : req.body.studentLastName,
+                  lastName    : req.body.studentLastName,
                   firstName   : req.body.studentFirstName,
                   teacher     : req.body.teacherName,
                   class       : req.body.teacherClass,
-                  hour         : req.body.teacherHour,
-                  comingFrom   : req.body.comingFrom,
-                  helpedWith   : req.body.helpedWith,
-                  helpedBy     : req.body.teacherThatHelped,
+                  hour        : req.body.teacherHour,
+                  comingFrom  : req.body.comingFrom,
+                  helpedWith  : req.body.helpedWith,
+                  helpedBy    : req.body.teacherThatHelped,
                   arcHour     : req.body.hourInArc,
                   comments    : req.body.comments
                 }
@@ -717,12 +747,16 @@ app.post('/checkin', (req, res) => {
                 if (err)
                   throw err;
 
+               	// Updating real time students
                 STUDENTS[resultantStudent.id] = resultantStudent;
                 util.log('Added ' +
                           resultantStudent.firstName +
                           ' ' +
                           resultantStudent.lastName
                         );
+
+                // Add student to file
+                studentFile.add(resultantStudent);
 
                 // Save the check in
                 Record.create(
@@ -784,26 +818,6 @@ app.get('/checkout/:id', (req, res) => {
   );
 });
 
-app.get('/sendattendence', (req, res) => {
-  // "Check out" all the students
-  Student
-    .find()
-    .remove(
-      {
-
-      },
-      (err, results) => {
-        util.log(`Removed ${results.result.n} students.`);
-      }
-    );
-
-  // Reset user-presented STUDENTS
-  STUDENTS = {};
-
-  // Back to the index page
-  res.redirect('/');
-});
-
 // 404
 app.use( (req, res) => {
     res.status(404);
@@ -819,16 +833,4 @@ app.listen(GLOBAL_PORT, (err) => {
     util.log(`Server running on ${GLOBAL_PORT}.`);
   else
     throw new Error(err);
-});
-
-// Catching possible RangeError exception (Mongo bug)
-process.on('uncaughtException', (err) => {
-  if (err instanceof RangeError) {
-    util.log('Range error occurred!');
-    util.log(`${err}.`);
-  }
-  else {
-    util.log(`Don't know what happened, but...\n\n`);
-    throw err;
-  }
 });

@@ -37,12 +37,16 @@
 			<div class="card-block">
 				<% for (let i = 0; i < collections.length; i += 2) { %>
 					<div class="card-block">
-						<a href="<%= collections[i] %>" class="col-xs-5 pull-xs-left btn btn-warning">
-							<h4><%= englishCapitalize(collections[i]) %></h4>
-						</a>
 						<% if (i + 1 < collections.length) { %>
-							<a href="<%= collections[i + 1] %>" class="col-xs-5 pull-xs-right btn btn-warning">
+							<a href="<%= collections[i] %>" class="col-xs-4 pull-xs-left btn btn-warning">
+								<h4><%= englishCapitalize(collections[i]) %></h4>
+							</a>
+							<a href="<%= collections[i + 1] %>" class="col-xs-4 pull-xs-right btn btn-warning">
 								<h4><%= englishCapitalize(collections[i + 1]) %></h4>
+							</a>
+						<% } else { %>
+							<a href="<%= collections[i] %>" class="col-xs-4 offset-xs-4 btn btn-warning">
+								<h4><%= englishCapitalize(collections[i]) %></h4>
 							</a>
 						<% } %>
 					</div>

@@ -1,13 +1,9 @@
 // Teacher email
+// Subject - ARC report for <student> 
 // - Student name
 // - Hour
 // - What they came in for
 // - Comments
-
-// Attendence office email
-// Subject: ARC Attendence - Hour x
-// - Student name
-// - Hour in ARC
 
 let googleapi = require('googleapis'),
     file_system = require('fs'),
