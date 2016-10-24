@@ -324,12 +324,12 @@ let renderPage = (model, req, res) => {
 
   // Checks to see if a specific page should be sent over the requested url
   if (typeof model.page === 'undefined')
-    model.page = process.cwd() + '\\views' + req.path;
+    model.page = __dirname + '\\views' + req.path;
   else
-    model.page = process.cwd() + '\\views' + model.page;
+    model.page = __dirname + '\\views' + model.page;
 
   // Render 'template.ejs' with our new model.
-  res.render('template', model);
+  res.render(`${__dirname}\\views\\template.ejs`, model);
 }
 
 // For every single request
