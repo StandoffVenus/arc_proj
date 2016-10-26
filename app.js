@@ -58,12 +58,21 @@ const async           = require('async'),
     user_argv         = require('minimist')(process.argv.slice(2)),
     // minimist allows us to parse command line args easier
 
+    jsonFile 					= require('jsonfile'),
+    // jsonfile reads json for us
+
     updateTeachers    = require('./teachers/updateTeachers.js'),
     generateTeachers	= require('./teachers/generateTeachers.js'),
     // Scripts for command-line arguments
 
     Schema = mongoose.Schema,
-    // Schema allows you to create models for mongoose and the DB you're using 
+    // Schema allows you to create models for mongoose and the DB you're using
+
+    STUDENT_FILE_SETTINGS = {
+    	"path" 	: "S:/",
+    	"ext"		: ".txt"
+    },
+    // Our student file settings
 
     COLLECTION_ACTIONS = {
       "edit": 1,
@@ -74,18 +83,16 @@ const async           = require('async'),
 
     GLOBAL_PORT = (typeof process.env.PORT !== 'undefined') 
                   ?  process.env.PORT
-                  :  56500,
+                  :  56500;
     // Global port to communicate with localhost on
-
-    STUDENTS_FILE_PATH = `${__dirname}/students.txt`;
-    // Where we write and update the students file
 
 	// Changing variables
 let STUDENTS = {},
     // Students checked in
 
-    studentFile = new (require('./studentWriter.js'))(STUDENTS_FILE_PATH),
-    // Writes to our student file for us
+    studentFile = require('./studentWriter.js')
+    							(STUDENT_FILE_SETTINGS.path + STUDENT_FILE_SETTINGS.ext),
+    // Writes to our student file for us */
 
     // Schemas
 		Student = require('./Schemas/Student.js'),
@@ -202,9 +209,6 @@ Student.find(
     );
   }
 );
-
-// Check if file needs to be updated
-studentFile.needsRewrite();
 
 // Setting up Gmail and Google's OAuth2
 let OAuth2 = googleapi.auth.OAuth2,
@@ -548,7 +552,7 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherNameError' : 'Selected teacher does not exist.'
                 },
-                teachers: teachers
+                teachers: _teachers
               },
               req,
               res
@@ -563,29 +567,26 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherClassError' : 'Invalid class chosen for teacher.'
                 },
-                teachers: teachers
+                teachers: _teachers
               },
               req,
               res
             );
           }
           // Checking if student chose a valid hour
-          else if (typeof teachers[req
-                                    .body
-                                    .teacherName]
-                            .hours[req
-                                    .body
-                                    .teacherClass]
-                                  [req
-                                    .body
-                                    .teacherHour]
-                    === 'undefined') {
+          else if (!teachers[req
+                              .body
+                              .teacherName]
+                      .hours[req
+                              .body
+                              .teacherClass]
+                        .includes(req.body.teacherHour)) {
             renderPage(
               {
                 errors: {
                   'teacherHourError' : 'Invalid hour chosen for class.'
                 },
-                teachers: teachers
+                teachers: _teachers
               },
               req,
               res
@@ -676,7 +677,7 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherNameError' : 'Selected teacher does not exist.'
                 },
-                teachers: teachers
+                teachers: _teachers
               },
               req,
               res
@@ -696,7 +697,7 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherClassError' : 'Invalid class chosen for teacher.'
                 },
-                teachers: teachers
+                teachers: _teachers
               },
               req,
               res
@@ -720,7 +721,7 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherHourError' : 'Invalid hour chosen for class.'
                 },
-                teachers: teachers
+                teachers: _teachers
               },
               req,
               res

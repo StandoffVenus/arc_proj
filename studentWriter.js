@@ -19,9 +19,12 @@ StudentWriter = function(filePath) {
     if (student) {
       file_system.appendFile(
         this.path,
-        `${student.lastName}, ${student.firstName}\t|\t` +
-          `${student.arcHour}\t|\t` +
-          `${ArrayToString(student.helpedWith)}\r\n`,
+        `${student.lastName}, ${student.firstName}\t|\t` 
+          + `${student.arcHour}\t|\t`
+          + (student.comingFrom !== 'studyhall')
+            ? student.comingFrom
+            : student.comingFromHour
+          + '\r\n',
         (err) => {
           if (err) {
             // This is an actual error as well
@@ -47,9 +50,12 @@ StudentWriter = function(filePath) {
   this.add = (student) => {
     file_system.appendFile(
       this.path,
-      `${student.lastName}, ${student.firstName}\t|\t` +
-        `${student.arcHour}\t|\t` +
-        `${ArrayToString(student.helpedWith)}\r\n`,
+      `${student.lastName}, ${student.firstName}\t|\t` 
+          + `${student.arcHour}\t|\t`
+          + (student.comingFrom !== 'studyhall')
+            ? student.comingFrom
+            : student.comingFromHour
+          + '\r\n',
       (err) => {
         if (err) {
           // Assume file doesn't exist
