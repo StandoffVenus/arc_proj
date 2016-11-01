@@ -65,41 +65,23 @@ StudentWriter = function(filePath) {
     )
   };
 
-  this.needsRewrite = () => {
-    file_system.stat(
-      this.path,
-      (err, stats) => {
-        if (err) {
-          // Assume file doesn't exist
+  // Check if we should rewrite the file.
+  file_system.stat(
+    this.path,
+    (err, stats) => {
+      if (err) {
+        // Assume file doesn't exist
+        this.write();
+      }
+      else {
+        // Checking if it's been 12 hours since last modification
+        if (Date.now() > 
+            (new Date(stats.mtime)).getTime() + 1000 * 60 * 60 * 12) {
           this.write();
         }
-        else {
-          // Checking if it's been 12 hours since last modification
-          if (Date.now() > 
-              (new Date(stats.mtime)).getTime() + 1000 * 60 * 60 * 12) {
-            this.write();
-          }
-        }
       }
-    )
-  }
-},
-
-// Only works on 1D arrays, so we'll only define it in this module
-ArrayToString = (arr) => {
-  if (arr.length < 2)
-    return arr[0];
-  else {
-    // This is synchronous, which is bad, but we'll let it slide
-    // since we're dealing with arrays that are 3 elements long at max
-    str = '';
-
-    for (i = 0; i < arr.length; i++) {
-      str += `${arr[i]}, `;
     }
-
-    return str;
-  }
-};
+  )
+}
 
 module.exports = StudentWriter;

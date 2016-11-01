@@ -70,6 +70,7 @@ const async           = require('async'),
 
     STUDENT_FILE_SETTINGS = {
     	"path" 	: "S:/",
+      "name"  : "students",
     	"ext"		: ".txt"
     },
     // Our student file settings
@@ -90,9 +91,16 @@ const async           = require('async'),
 let STUDENTS = {},
     // Students checked in
 
-    studentFile = require('./studentWriter.js')
-    							(STUDENT_FILE_SETTINGS.path + STUDENT_FILE_SETTINGS.ext),
-    // Writes to our student file for us */
+    studentFileConstructor = require('./studentWriter.js'),
+    // Writes to our student file for us
+    // This is a constructor
+
+    studentFile = new studentFileConstructor(
+                    STUDENT_FILE_SETTINGS.path
+                    + STUDENT_FILE_SETTINGS.name
+                    + STUDENT_FILE_SETTINGS.ext
+                  ),
+    // Our actual student file
 
     // Schemas
 		Student = require('./Schemas/Student.js'),
