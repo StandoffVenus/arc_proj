@@ -1,9 +1,10 @@
 let ALL_TEACHERS = [];
 
-let Teacher = function(name, classes, hours) {
-	this.name = name;
-	this.classes = classes;
-	this.hours = hours;
+let Teacher = function(name, classes, hours, id) {
+	this.name 		= name;
+	this.classes 	= classes;
+	this.hours 		= hours;
+	this.id 			= id;
 }
 
 let addTeacher = (teacher) => {
@@ -30,8 +31,8 @@ let buildTeachersBox = () => {
 
 		input.type = 'radio';
 		input.setAttribute('id', `mathTeacher${index}`);
-		input.setAttribute('name', 'teacherName');
-		input.setAttribute('value', teacher.name);
+		input.setAttribute('name', 'teacherId');
+		input.setAttribute('value', teacher.id);
 
 		input.addEventListener('click', () => {
 			document
@@ -125,11 +126,11 @@ let buildTeacherThatHelped = () => {
 		let input = document.createElement('input');
 		let label = document.createElement('label');
 
-		label.setAttribute('for', `teacherHelped${teacher.name}`);
+		label.setAttribute('for', `teacherHelped${teacher.id}`);
 		label.innerHTML = teacher.name;
 
 		input.type = 'checkbox';
-		input.setAttribute('id', `teacherHelped${teacher.name}`);
+		input.setAttribute('id', `teacherHelped${teacher.id}`);
 		input.setAttribute('name', 'teacherThatHelped');
 		input.setAttribute('value', teacher.name);
 

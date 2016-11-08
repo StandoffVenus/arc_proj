@@ -53,17 +53,26 @@ file_system.readFile(
 
         let base64String = base64.encode('Hello, world!');
 
-        gmail.users.drafts.get(
+        gmail.users.drafts.list(
           {
             'userId' : 'me',
-            'id' : 'r-4375417724157592912',
-            'format' : 'raw'
           },
           (err, response) => {
-            if (err)
-              console.log(err);
-            else
-              console.log(response.message.snippet);
+            response.drafts.forEach(
+              (draft) => {
+                setTimeout(
+                  () => {
+                    gmail.users.drafts.delete(
+                      {
+                        'userId'  : 'me',
+                        'id'      : draft.id
+                      }
+                    );
+                  },
+                  5000
+                );
+              }
+            );
           }
         );
       }

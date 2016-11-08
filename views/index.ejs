@@ -17,46 +17,56 @@
     </a>
   </div>
   <div class="col-xs-9">
-    <h2 class="pull-xs-left offset-xs-1">
-      Students
-    </h2>
-    <table class="table table-bordered table-sm table-inverse">
-      <thead>
-        <tr>
-          <th width="40%">
-            Last name
-          </th>
-          <th width="40%">
-            First name
-          </th>
-          <th>
-            Options
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <% let studentsKeys = Object.keys(students); %>
-        <% for (let i = 0; i < studentsKeys.length; i++) { %>
+    <% if (typeof students !== 'undefined' && students.length > 0) { %>
+      <h2 class="pull-xs-left offset-xs-1">
+        Students
+      </h2>
+      <table class="table table-bordered table-sm table-inverse">
+        <thead>
           <tr>
-            <th>
-              <%=
-                students[studentsKeys[i]].lastName;
-              %>
+            <th width="25%">
+              Last name
             </th>
-            <th>
-              <%=
-                students[studentsKeys[i]].firstName;
-              %>
+            <th width="25%">
+              First name
             </th>
-            <th>
-              <a href="/checkout/<%= students[studentsKeys[i]].id %>"
-              class="btn btn-info col-xs-12">
-                Check out
-              </a>
+            <th width="50%">
+              Options
             </th>
           </tr>
-        <% } %> 
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% let studentsKeys = Object.keys(students); %>
+          <% for (let i = 0; i < studentsKeys.length; i++) { %>
+            <tr>
+              <th>
+                <%=
+                  students[studentsKeys[i]].lastName;
+                %>
+              </th>
+              <th>
+                <%=
+                  students[studentsKeys[i]].firstName;
+                %>
+              </th>
+              <th>
+                <form action="/checkout" method="POST">
+                  <div class="container-fluid">
+                    <input type="submit" name="submit" value="Check out" class="btn btn-info pull-xs-left col-xs-5" />
+                    <a href="#comment<%= students[studentsKeys[i]]._id %>" class="btn btn-info pull-xs-right col-xs-5" onclick="setComment('<%= students[studentsKeys[i]]._id %>');">Set comment</a>
+                  </div>
+                  <input type="hidden" name="id" value="<%= students[studentsKeys[i]]._id %>" />
+                  <textarea style="font-weight: normal;" rows="3" type="text" maxlength="250" id="comment<%= students[studentsKeys[i]]._id %>" class="col-xs-12" name="comment"><%= students[studentsKeys[i]].comments %></textarea>
+                </form>
+              </th>
+            </tr>
+          <% } %> 
+        </tbody>
+      </table>
+    <% } else { %>
+      <h2 class="text-xs-center">
+        No students found.
+      </h2>
+    <% } %>
   </div>
 </div>

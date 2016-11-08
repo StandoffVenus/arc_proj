@@ -21,9 +21,9 @@ StudentWriter = function(filePath) {
         this.path,
         `${student.lastName}, ${student.firstName}\t|\t` 
           + `${student.arcHour}\t|\t`
-          + (student.comingFrom !== 'studyhall')
+          + ((student.comingFrom !== 'studyhall')
             ? student.comingFrom
-            : student.comingFromHour
+            : student.studyHallRoom)
           + '\r\n',
         (err) => {
           if (err) {
@@ -52,9 +52,9 @@ StudentWriter = function(filePath) {
       this.path,
       `${student.lastName}, ${student.firstName}\t|\t` 
           + `${student.arcHour}\t|\t`
-          + (student.comingFrom !== 'studyhall')
+          + ((student.comingFrom !== 'studyhall')
             ? student.comingFrom
-            : student.comingFromHour
+            : student.studyHallRoom)
           + '\r\n',
       (err) => {
         if (err) {

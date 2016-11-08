@@ -1,6 +1,11 @@
-sendAttendenceConfirm = () => {
-	let confirmed = confirm('Are you sure you want to send attendence? Doing so will clear all records.');
+"use strict";
 
-	if (confirmed)
-		window.location = "/sendattendence";
+let setComment = (id) => {
+  let xhr = new XMLHttpRequest();
+
+  xhr.open('POST', '/setComment');
+  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+  let comment = document.getElementById(`comment${id}`).value;
+  xhr.send(`id=${id}&comment=${comment}`);
 }

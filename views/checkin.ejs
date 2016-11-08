@@ -20,7 +20,7 @@
 			hoursString = hoursString.substring(0, hoursString.length - 1) + '}';
 			classesString = classesString.substring(0, classesString.length - 1) + ']';
 	%>
-		addTeacher(new Teacher('<%- teacher.lastName %>', <%- classesString %>, <%- hoursString %>));
+		addTeacher(new Teacher('<%- teacher.lastName %>', <%- classesString %>, <%- hoursString %>, '<%- teacher.id %>'));
 	<% }); %>
 </script>
 
@@ -127,11 +127,6 @@
 
 							</ul>
 						</div>
-					</div>
-					<br />
-					<div class="input-group">
-						<label class="input-group-addon" for="studentComments">Comments</label>
-						<textarea class="form-control" id="studentComments" name="comments" type="text" placeholder="Enter comments here." style="resize: none;"></textarea>
 					</div>
 					<br />
 				</div>

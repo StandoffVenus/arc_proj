@@ -1,6 +1,5 @@
 /* TODO:
-	- Change student file to point at shared folder
-	- Email teachers on checkin/checkout
+	- Email teachers on checkout
 	- Allow users to edit DB's
 	- Spruce up code for /checkin POST
 
@@ -18,7 +17,6 @@ const async           = require('async'),
     // async allows us to easily use functions asynchronously
 
     base64            = require('js-base64').Base64,
-    // Google requires that our emails' content be encoded in base-64
 
     mongo             = require('mongodb'), 
     // This is the DB - it is a non-relation DB called MongoDB
@@ -29,8 +27,8 @@ const async           = require('async'),
     express           = require('express'),
     // express is a framework to simplify Node's HTTP package
 
-    googleapi					= require('googleapis'),
-    // google's framework for accesses to their apis
+    Email             = require('./email.js'),
+    // Wrapper class that lets us compose and send gmail emails more easily
 
     path              = require('path'),
     // path allows us easier manipulation of local paths and what not
@@ -146,9 +144,8 @@ mongoose.connect(
 		      			throw err;
 							}
 
-							util.log('Succeeded in connecting to ' +
-		                      mongoose.connection.host +
-		                      '\n');
+							util.log('Succeeded in connecting to '
+                        + mongoose.connection.host);
 		      	}
 		      );
 		    },
@@ -156,7 +153,7 @@ mongoose.connect(
 		  );
     }
     else
-    	util.log(`Succeeded in connecting to ${mongoose.connection.host}.\n`);
+    	util.log(`Succeeded in connecting to ${mongoose.connection.host}.`);
   }
 );
 
@@ -166,31 +163,30 @@ let db = mongoose.connection; // Initialize db with mongoose connection
 db.on(
 	'error',
 	(err) => {
-		if (err) {
-			console.log('');
-			util.log(`DB encountered error, presumably with connection.`);
+    db.close();
+		console.log('');
+		util.log(`DB encountered error, presumably with connection.`);
 
-			setTimeout(
-				() => {
-				  mongoose.connect(
-				  	'mongodb://127.0.0.1/app',
-				  	(err) => {
-				  		if (err) {
-				  			util.log('Failed with local IP.');
-				  			throw err;
-							}
+		setTimeout(
+			() => {
+			  mongoose.connect(
+			  	'mongodb://127.0.0.1/app',
+			  	(err) => {
+			  		if (err) {
+			  			util.log('Failed with local IP.');
+			  			throw err;
+						}
 
-							util.log('Succeeded in connecting to ' +
-				                  mongoose.connection.host +
-				                  '\n');
-				  	}
-				  );
-				},
-				5000
-			);
-		}
-		else
-    	util.log(`Succeeded in recovering from connection error.\n`);
+						util.log('Succeeded in connecting to ' +
+			                  mongoose.connection.host +
+			                  '\n');
+
+            db = mongoose.connection;
+			  	}
+			  );
+			},
+			5000
+		);
 	}
 );
 
@@ -200,77 +196,38 @@ Student.find(
 
   },
   (err, students) => {
-    if (err)
-      throw err;
-
-    async.each(
-      students,
-      (student, callback) => {
-        STUDENTS[student.id] = student;
-      },
-      (err) => {
-        if (err) {
-          util.log(`Encountered error adding student(s).`);
-          util.log(`${err}`);
+    if (err) {
+      util.log(`Encountered error when adding student(s).\n`);
+      util.log(err);
+    }
+    else {
+      async.each(
+        students,
+        (student, callback) => {
+          STUDENTS[student.id] = student;
+        },
+        (err) => {
+          if (err) {
+            util.log(`Encountered error adding student(s).`);
+            util.log(err);
+          }
         }
-      }
-    );
+      );
+    }
   }
 );
 
-// Setting up Gmail and Google's OAuth2
-let OAuth2 = googleapi.auth.OAuth2,
-    OAuth2Client,
-    gmail;
+let email = new Email(
+  `${__dirname}/credentials/client_secret.json`,
+  `${__dirname}/credentials/gmail-nodejs-quickstart.json`,
+  (err) => {
+    if (err)
+      throw err;
+  }
+);
 
-/* file_system.readFile(
-  // Read in our project's OAuth2 information from a file
-	`${__dirname}/credentials/client_secret.json`,
-	(err, data) => {
-		if (err)
-			throw err;
 
-    // Parse the resultant JSON
-		let client = JSON.parse(data);
-
-    // Create a new OAuth2 client from our information
-		OAuth2Client = new OAuth2(
-											client.web.client_id,
-											client.web.client_secret,
-											client.web.redirect_uris
-										);
-
-		file_system.readFile(
-      // Read in our credentials from a file
-			`${__dirname}/credentials/gmail-nodejs-quickstart.json`,
-			(err, data) => {
-				if (err)
-					throw err;
-
-        // Parse our credentials
-				let credentials = JSON.parse(data);
-
-        // Set up our credentials in our OAuth2 client
-				OAuth2Client.setCredentials(
-					{
-						access_token 	: credentials.access_token,
-						refresh_token : credentials.refresh_token,
-						expiry_date		: credentials.expiry_date
-					}
-				);
-
-        // Set up Gmail with our newly created auth
-        gmail = new googleapi.gmail(
-          {
-            'version' : 'v1',
-            'auth'    : OAuth2Client
-          }
-        );
-			}
-		);
-	}
-); */
-
+			
 // Creating the "server" object
 let app = express();
 
@@ -350,9 +307,9 @@ app.use( (req, res, next) => {
   res.locals.path = path;
   // Giving pages mongoose models
   res.locals.mongoose = mongoose;
-  
+
   // This logs all requests a user makes
-  util.log(`Request to ${req.url} via ${req.method.toUpperCase()}`);
+  util.log(`Request to ${req.url} via ${req.method.toUpperCase()}\n`);
   next();
 });
 
@@ -363,13 +320,33 @@ app.get('/', (req, res) => {
 
 // Index page
 app.get('/index', (req, res) => {
-  renderPage(
+  Student.find(
     {
-      students: STUDENTS,
+
     },
-    req,
-    res
-  );
+    (err, students) => {
+      if (err) {
+        util.log('Encountered an error when loading students.');
+        util.log(err);
+
+        renderPage(
+          {
+            students: []
+          },
+          req,
+          res
+        );
+      }
+
+      renderPage(
+        {
+          students: students,
+        },
+        req,
+        res
+      );
+    }
+  )
 });
 
 // Redirect to collections
@@ -407,23 +384,26 @@ app.get('/collections/:collection', (req, res) => {
 
       },
       (err, entries) => {
-        if (err)
-          throw err;
-
-        renderPage(
-          {
-            schemaName: schemaName,
-            page: '/collections',
-            entries: entries,
-            paths: Object.keys(
-              mongoose.model(
-                schemaName
-              ).schema.obj
-            )
-          },
-          req,
-          res
-        );
+        if (err) {
+          util.log(`Encountered an error when indexing with ${schemaName} schema.`);
+          res.redirect('/collections/show');
+        }
+        else {
+          renderPage(
+            {
+              schemaName: schemaName,
+              page: '/collections',
+              entries: entries,
+              paths: Object.keys(
+                mongoose.model(
+                  schemaName
+                ).schema.obj
+              )
+            },
+            req,
+            res
+          );
+        }
       }
     );
   }
@@ -446,16 +426,20 @@ app.get('/checkin', (req, res) => {
 
     },
     (err, teachers) => {
-      if (err)
-        throw err;
-
-      renderPage(
-        {
-          teachers: teachers
-        },
-        req,
-        res
-      );
+      if (err) {
+        util.log('Encountered error when looking for teachers.');
+        util.log(err);
+        res.redirect('/');
+      }
+      else {
+        renderPage(
+          {
+            teachers: teachers
+          },
+          req,
+          res
+        );
+      }
     }
   );
 });
@@ -470,7 +454,7 @@ app.post('/checkin', (req, res) => {
     .checkBody('studentLastName', 'You must include a last name.')
     .notEmpty();
   req
-    .checkBody('teacherName', 'No teacher was chosen.')
+    .checkBody('teacherId', 'No teacher was chosen.')
     .notEmpty();
   req
     .checkBody('teacherClass', 'No class was chosen.')
@@ -543,31 +527,35 @@ app.post('/checkin', (req, res) => {
 
         },
         (err, _teachers) => {
-          let teachers = {};
-
-          Object.keys(_teachers).forEach( (key) => {
-            teachers[_teachers[key].lastName] = _teachers[key];
-          });
-
           if (err)
             throw err;
 
+          let teachers = {};
+
+          _teachers.forEach(
+            (teacher, index) => {
+              teachers[teacher.id] = index;
+            }
+          );
+
             // Checks for valid data
           // Checking if the teacher chosen is a valid teacher
-          if (typeof teachers[req.body.teacherName] === 'undefined') {
+          if (typeof teachers[req.body.teacherId] === 'undefined') {
             renderPage(
               {
                 errors: {
-                  'teacherNameError' : 'Selected teacher does not exist.'
+                  'teacherIdError' : 'Selected teacher does not exist.'
                 },
-                teachers: _teachers
+                teachers: teachers
               },
               req,
               res
             );
           }
           // Checking if class is valid
-          else if (!teachers[req.body.teacherName]
+          else if (!_teachers[
+                      teachers[req.body.teacherId]
+                    ]
                       .classes
                       .includes(req.body.teacherClass)) {
             renderPage(
@@ -575,16 +563,16 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherClassError' : 'Invalid class chosen for teacher.'
                 },
-                teachers: _teachers
+                teachers: teachers
               },
               req,
               res
             );
           }
           // Checking if student chose a valid hour
-          else if (!teachers[req
-                              .body
-                              .teacherName]
+          else if (!_teachers[
+                      teachers[req.body.teacherId]
+                    ]
                       .hours[req
                               .body
                               .teacherClass]
@@ -594,20 +582,22 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherHourError' : 'Invalid hour chosen for class.'
                 },
-                teachers: _teachers
+                teachers: teachers
               },
               req,
               res
             );
           }
           else {
+            console.log(req.body);
+
             // Save student
             Student.create(
               new Student(
                 {
                   lastName      : req.body.studentLastName,
                   firstName     : req.body.studentFirstName,
-                  teacher       : req.body.teacherName,
+                  teacherId     : req.body.teacherId,
                   class         : req.body.teacherClass,
                   hour          : req.body.teacherHour,
                   comingFrom    : req.body.comingFrom,
@@ -615,14 +605,13 @@ app.post('/checkin', (req, res) => {
                   helpedWith    : req.body.helpedWith,
                   helpedBy      : req.body.teacherThatHelped,
                   arcHour       : req.body.hourInArc,
-                  comments      : req.body.comments
+                  comments      : ''
                 }
               ),
               (err, resultantStudent) => {
                 if (err)
                   throw err;
 
-                STUDENTS[resultantStudent.id] = resultantStudent;
                 util.log('Added ' +
                           resultantStudent.firstName +
                           ' ' +
@@ -661,40 +650,35 @@ app.post('/checkin', (req, res) => {
 
         },
         (err, _teachers) => {
-          let teachers = {};
-
-          Object
-            .keys(_teachers)
-            .forEach(
-              (key) => {
-                teachers[_teachers[key].lastName] = _teachers[key];
-              }
-            );
-
           if (err)
             throw err;
 
+          let teachers = {};
+
+          _teachers.forEach(
+            (teacher, index) => {
+              teachers[teacher.id] = index;
+            }
+          );
+
             // Checks for valid data
           // Checking if the teacher chosen is a valid teacher
-          if (typeof teachers[req
-                                .body
-                                .teacherName]
-              === 'undefined') {
+          if (typeof teachers[req.body.teacherId] === 'undefined') {
             renderPage(
               {
                 errors: {
-                  'teacherNameError' : 'Selected teacher does not exist.'
+                  'teacherIdError' : 'Selected teacher does not exist.'
                 },
-                teachers: _teachers
+                teachers: teachers
               },
               req,
               res
             );
           }
           // Checking if class is valid
-          else if (!teachers[req
-                              .body
-                              .teacherName]
+          else if (!_teachers[
+                      teachers[req.body.teacherId]
+                    ]
                       .classes
                       .includes(req
                                   .body
@@ -705,16 +689,16 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherClassError' : 'Invalid class chosen for teacher.'
                 },
-                teachers: _teachers
+                teachers: teachers
               },
               req,
               res
             );
           }
           // Checking if student chose a valid hour
-          else if (typeof teachers[req
-                                    .body
-                                    .teacherName]
+          else if (typeof _teachers[
+                            teachers[req.body.teacherId]
+                          ]
                             .hours[req
                                     .body
                                     .teacherClass]
@@ -729,7 +713,7 @@ app.post('/checkin', (req, res) => {
                 errors: {
                   'teacherHourError' : 'Invalid hour chosen for class.'
                 },
-                teachers: _teachers
+                teachers: teachers
               },
               req,
               res
@@ -742,22 +726,23 @@ app.post('/checkin', (req, res) => {
                 {
                   lastName    : req.body.studentLastName,
                   firstName   : req.body.studentFirstName,
-                  teacher     : req.body.teacherName,
+                  teacherId   : req.body.teacherId,
                   class       : req.body.teacherClass,
                   hour        : req.body.teacherHour,
                   comingFrom  : req.body.comingFrom,
                   helpedWith  : req.body.helpedWith,
                   helpedBy    : req.body.teacherThatHelped,
                   arcHour     : req.body.hourInArc,
-                  comments    : req.body.comments
+                  comments    : ''
                 }
               ),
               (err, resultantStudent) => {
+                console.log(req.body);
+
                 if (err)
                   throw err;
 
                	// Updating real time students
-                STUDENTS[resultantStudent.id] = resultantStudent;
                 util.log('Added ' +
                           resultantStudent.firstName +
                           ' ' +
@@ -793,29 +778,90 @@ app.post('/checkin', (req, res) => {
   }
 });
 
-// checkout
-app.get('/checkout/:id', (req, res) => {
+// setComment - POST
+app.post('/setComment', (req, res) => {
+  // Comment and student id
+  let comment = req.body.comment,
+      id      = req.body.id;
+
+  // Don't run anything but redirect if empty POST body
+  if (comment === '' || id === '') {
+    res.redirect('/');
+  }
+
+  Student.findById(
+    id,
+    (err, student) => {
+      if (err) {
+        util.log('Encountered error finding student.');
+        util.log(err);
+        res.redirect('/');
+      }
+
+      student.comments = comment;
+
+      student.save(
+        (err, updateStudent) => {
+          if (err) {
+            util.log(`There was an error saving student ${id}.`);
+            util.log(err);
+          }
+
+          res.redirect('/');
+        }
+      );
+    }
+  );
+});
+
+// checkout - POST
+app.post('/checkout', (req, res) => {
   // Find specific student
-  Student.find(
-    {
-      id: req.params.id
-    },
+  Student.findById(
+    req.body.id,
     (err, student) => {
       // Attempt to delete student
       try {
         if (err)
           throw err;
 
-        // If the student exists in the user-presented students
-        // and the student exists in the DB
-        if (typeof STUDENTS[req.params.id] !== 'undefined'
-            && typeof student !== 'undefined') {
-          // Delete from user students
-          delete STUDENTS[req.params.id];
-          util.log(`Deleted student at id ${req.params.id}.`);
-        }
-        else
-          throw new Error(`Invalid student id ${req.params.id}.`);
+        // Remove students from the DB
+        Student.remove(
+          {
+            _id: req.body.id
+          },
+          (err) => {
+            if (err) {
+              util.log(`Error removing student ${req.body.id}.`);
+              throw err;
+            }
+
+            if (student.comments !== '') {
+              Teacher.findById(
+                student.teacherId,
+                (err, teacher) => {
+                  // Create and send an email under this email
+                  email.create(
+                    teacher.email,
+                    `${student.firstName} ${student.lastName} in MHS ARC`,
+                    `"${student.comments}" ~${student.helpedBy}`,
+                    (err, response) => {
+                      if (err)
+                        throw err;
+                      email.send(
+                        response.id,
+                        (err, response) => {
+                          if (err)
+                            throw err;
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          }
+        );
       }
       catch (err) {
         util.log(`Failed to remove student ${req.body.id}.`);
