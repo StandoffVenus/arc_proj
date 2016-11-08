@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html lang="en-US" style="height: 100%;">
+<html lang="en-US">
 	<head>
 		<% // Styles and JS %>
 		<%- include('universalhead') %>
 	</head>
-	<body style="background: #06A;">
+	<body>
 		<br />
-		<div class="jumbotron container" style="border-radius: 2em;">
-			<h1>404!</h1>
-			<br />
-			<h3>Sorry! We couldn't reach the page you were looking for!</h3>
+		<div class="col-xs-8 offset-xs-2">
+			<div class="card">
+				<div class="card-header">
+					<h1 class="text-danger pull-xs-left col-xs-4">404!</h1>
+					<a href="/" class="btn btn-success col-xs-4 pull-xs-right">
+						<h3>
+							<span class="glyphicon glyphicon-circle-arrow-left"></span>
+							&nbspBack
+						</h3>
+					</a>
+				</div>
+				<br />
+				<div class="card-block text-xs-center">
+					<h3 class="text-warning">Sorry! We couldn't reach the page you were looking for!</h3>
+					<br />
+					<h3 class="text-warning">But here's what we can show you instead:</h3>
+					<img alt="Looks like we can't even show you that!" src="/static/img/prattDance.gif">
+				</div>
+			</div>
 		</div>
 	</body>
 </html>

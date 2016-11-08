@@ -1,0 +1,30 @@
+{
+  "_id": "57f6a00300e4c50aa4a89ac5",
+  "__v": 0,
+  "lastName": "Pratt",
+  "hours": {
+    "Precalc With Trig": [
+      "1",
+      "2",
+      "7"
+    ],
+    "Computer Programming": [
+      "4a/4b"
+    ],
+    "AP Computer Science": [
+      "5a/5b"
+    ],
+    "Intro To Computer Science": [
+      "6"
+    ]
+  },
+  "email": "prattsc@masd.k12.wi.us",
+  "homeroom": 285,
+  "extension": 25285,
+  "classes": [
+    "Precalc With Trig",
+    "Computer Programming",
+    "AP Computer Science",
+    "Intro To Computer Science"
+  ]
+}

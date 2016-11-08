@@ -1,0 +1,26 @@
+{
+  "_id": "57f6858f8f070818cc8642d6",
+  "__v": 0,
+  "lastName": "Nawrocki",
+  "hours": {
+    "Advanced Algebra": [
+      "6",
+      "7"
+    ],
+    "Geometry": [
+      "3"
+    ],
+    "Precalc With Trig": [
+      "1",
+      "5a/5b"
+    ]
+  },
+  "email": "nawrova@masd.k12.wi.us",
+  "homeroom": 281,
+  "extension": 25281,
+  "classes": [
+    "Precalc With Trig",
+    "Geometry",
+    "Advanced Algebra"
+  ]
+}

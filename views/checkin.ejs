@@ -1,0 +1,138 @@
+<script src="static/checkin.js"></script>
+<script>
+	<%
+		teachers.forEach( (teacher) => {
+			let classesString = '[';
+			let hoursString = '{';
+
+			teacher.classes.forEach( (_class) => {
+				classesString += `'${_class}',`;
+				hoursString += `'${_class}' : [`;
+
+				teacher.hours[_class].forEach( (hour) => {
+					hoursString += `'${hour}',`;
+				});
+
+				hoursString = hoursString.substring(0, hoursString.length - 1);
+				hoursString += '],';
+			});
+
+			hoursString = hoursString.substring(0, hoursString.length - 1) + '}';
+			classesString = classesString.substring(0, classesString.length - 1) + ']';
+	%>
+		addTeacher(new Teacher('<%- teacher.lastName %>', <%- classesString %>, <%- hoursString %>, '<%- teacher.id %>'));
+	<% }); %>
+</script>
+
+<form method="POST" class="hasJS">
+	<div class="card-deck-wrapper">
+		<div class="card-deck">
+			<div class="card">
+				<h2 class="text-xs-center card-header">Student Information</h2>
+				<div class="card-block">
+					<div class="input-group">
+						<label for="studentFirstName" class="input-group-addon">First name</label>
+						<input id="studentFirstName" type="text" class="form-control" name="studentFirstName" placeholder="First name" />
+					</div>
+					<br />
+					<div class="input-group">
+						<label for="studentLastName" class="input-group-addon">Last name</label>
+						<input id="studentLastName" type="text" class="form-control" name="studentLastName" placeholder="Last name" />
+					</div>
+					<br />
+					<div class="input-group">
+						<div class="input-group-addon">Your Math Teacher</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box" id="yourTeacherPlaceholder">Choose teacher&nbsp</button>
+							<ul class="dropdown-menu" id="yourTeacher">
+								
+							</ul>
+						</div>
+					</div>
+					<br />
+					<div class="input-group">
+						<div class="input-group-addon">Teacher's Class</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box" id="yourTeacherClassesPlaceholder">Choose class&nbsp</button>
+							<ul class="dropdown-menu" id="yourTeacherClasses">
+
+							</ul>
+						</div>
+					</div>
+					<br />
+					<div class="input-group">
+						<div class="input-group-addon">Hour(s)</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box" id="yourTeacherHourPlaceholder">Choose hour(s)&nbsp</button>
+							<ul class="dropdown-menu" id="yourTeacherHour">
+
+							</ul>
+						</div>
+					</div>
+					<br />
+					<div class="input-group">
+						<div class="input-group-addon">Coming From</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box">Study Hall&nbsp</button>
+							<ul class="dropdown-menu">
+								<li><input type="radio" id="studyhallRadio" name="comingFrom" value="studyhall" checked="checked" onclick="toggleStudyHallBox(true)"><label for="studyhallRadio">Study Hall</label></li>
+								<li><input type="radio" id="classroomRadio" name="comingFrom" value="classroom" onclick="toggleStudyHallBox(false)"><label for="classroomRadio">Classroom</label></li>
+								<li><input type="radio" id="lunchRadio" name="comingFrom" value="lunch" onclick="toggleStudyHallBox(false)"><label for="lunchRadio">Lunch</label></li>
+							</ul>
+						</div>
+						<input type="text" id="studyhallBox" name="comingFromRoom" maxlength="3" class="input-group-addon" placeholder="Room Number">
+					</div>
+					<br />
+				</div>
+			</div>
+
+			<div class="card">
+				<h2 class="text-xs-center card-header">ARC Information</h2>
+				<div class="card-block">
+					<div class="input-group">
+						<div class="input-group-addon">Helped with</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box">Choose all that apply&nbsp</button>
+							<ul class="dropdown-menu">
+								<li><input type="checkbox" id="helpedWithHomeworkRadio" name="helpedWith" value="homework"><label for="helpedWithHomeworkRadio">Homework</label></li>
+								<li><input type="checkbox" id="helpedWithTestRetakeRadio" name="helpedWith" value="testRetake"><label for="helpedWithTestRetakeRadio">Test Retake</label></li>
+								<li><input type="checkbox" id="helpedWithRemedialRadio" name="helpedWith" value="remedial"><label for="helpedWithRemedialRadio">Remedial</label></li>
+							</ul>
+						</div>
+					</div>
+					<br />
+					<div class="input-group">
+						<div class="input-group-addon">Hour in ARC</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box">Choose hour&nbsp</button>
+							<ul class="dropdown-menu">
+								<li><input type="radio" id="hourInArc1" name="hourInArc" value="1"><label for="hourInArc1">1</label></li>
+								<li><input type="radio" id="hourInArc2" name="hourInArc" value="2"><label for="hourInArc2">2</label></li>
+								<li><input type="radio" id="hourInArc3" name="hourInArc" value="3"><label for="hourInArc3">3</label></li>
+								<li><input type="radio" id="hourInArc4a" name="hourInArc" value="4a"><label for="hourInArc4a">4a</label></li>
+								<li><input type="radio" id="hourInArc4b" name="hourInArc" value="4b"><label for="hourInArc4b">4b</label></li>
+								<li><input type="radio" id="hourInArc4c" name="hourInArc" value="4c"><label for="hourInArc4c">4c</label></li>
+								<li><input type="radio" id="hourInArc5a" name="hourInArc" value="5a"><label for="hourInArc5a">5a</label></li>
+								<li><input type="radio" id="hourInArc6" name="hourInArc" value="6"><label for="hourInArc6">6</label></li>
+								<li><input type="radio" id="hourInArc7" name="hourInArc" value="7"><label for="hourInArc7">7</label></li>
+							</ul>
+						</div>
+					</div>
+					<br />
+					<div class="input-group">
+						<div class="input-group-addon">Helped by</div>
+						<div class="btn-group">
+							<button data-toggle="dropdown" class="btn btn-info dropdown-toggle dropdown-menu-box">Choose teacher(s)&nbsp</button>
+							<ul class="dropdown-menu" id="arcTeacherThatHelped">
+
+							</ul>
+						</div>
+					</div>
+					<br />
+				</div>
+				<input class="col-xs-4 offset-xs-1 btn btn-info" type="submit" name="submit">
+				<a href="/" class="col-xs-4 offset-xs-2 btn btn-danger">Cancel</a>
+			</div>
+		</div>
+	</div>
+</form>

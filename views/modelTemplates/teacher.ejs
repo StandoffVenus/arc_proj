@@ -1,0 +1,36 @@
+<tr class="text-xs-center">
+	<th scope="row">
+		<a href="<%= `http://www.masd.k12.wi.us/faculty/${entry.email.substring(0, 7)}/` %>" class="text-info">
+			<%= entry.lastName %>
+		</a>
+	</th>
+	<td>
+		<% for (let i = 0; i < entry.classes.length; i++) { %>
+			<li>
+				<%= entry.classes[i] %>
+				<%= (i < entry.classes.length - 1) ?
+							',' :
+							''; %>
+			</li>
+		<% } %>
+	</td>
+	<td>
+		<% for (let i = 0; i < entry.classes.length; i++) { %>
+			<%= entry.classes[i] %><br />
+			<ul>
+				<% for (let j = 0; j < entry.hours[entry.classes[i]].length; j++) { %>
+					<li><%= entry.hours[entry.classes[i]][j] %></li>
+				<% } %>
+			</ul>
+		<% } %>
+	</td>
+	<td>
+		<%= entry.email %>
+	</td>
+	<td>
+		<%= entry.homeroom %>
+	</td>
+	<td>
+		<%= entry.extension %>
+	</td>
+</tr>

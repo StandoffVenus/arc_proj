@@ -1,12 +1,68 @@
+<%
+  let splitAtCapitals = (str) => {
+    return str
+            .split(/(?=[A-Z])/)
+            .join(" ");
+  }
+
+  let englishCapitalize = (str) => {
+    let newStr = splitAtCapitals(str);
+
+    return newStr
+            .substring(0, 1)
+            .toUpperCase() +
+
+          newStr
+            .substring(1)
+            .toLowerCase();
+  } 
+%>
+
 <!DOCTYPE html>
 <html lang="en-US" style="height: 100%;">
 	<head>
 		<% // All the styles and JS we'll need %>
 		<%- include('universalhead.ejs') %>
 	</head>
-	<body class="container">
-		<br />
-		<% // Including whichever page the model asks for %>
-		<%- include( page ); %>
+	<body class="container-fluid">
+		<noscript>
+			<style type='text/css'>
+				.hasJS { display: none; }
+			</style>
+			<h2 class="text-xs-center">
+				If your browser does not support JavaScript, or you have turned it off, this domain will not function properly. Please enable it to access all the pages on this domain.
+			</h2>
+		</noscript>
+		<div class="hasJS">
+			<br />
+			<% let keys = Object.keys(errors); %>
+			<% if (keys.length > 0) { %>
+				<div class="card">
+					<h2 class="text-danger card-header">Error!</h2>
+					<div class="card-block">
+						It appears there were errors completing that request!
+					</div>
+					<ul class="list-group list-group-flush">
+						<% for (let i = 0; i < keys.length; i++) { %>
+							<li class="text-warning list-group-item"><strong><%= errors[keys[i]].msg %></strong></li>
+						<% } %>
+					</ul>
+				</div>
+				<br />
+				<br />
+			<% } %>
+
+			<div class="container-fluid">
+				<% // Implementing passed page %>
+				<%- include(
+							page,
+							{
+								splitAtCapitals: splitAtCapitals,
+								englishCapitalize: englishCapitalize
+							}
+						);
+				%>
+			</div>
+		</div>
 	</body>
 </html>

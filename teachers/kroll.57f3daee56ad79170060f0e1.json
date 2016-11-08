@@ -1,0 +1,26 @@
+{
+  "_id": "57f3daee56ad79170060f0e1",
+  "lastName": "Kroll",
+  "hours": {
+    "Geometry": [
+      "6",
+      "7"
+    ],
+    "Math Skills A": [
+      "3"
+    ],
+    "Advanced Algebra": [
+      "1",
+      "4c/5a"
+    ]
+  },
+  "email": "krolljo@masd.k12.wi.us",
+  "homeroom": 269,
+  "extension": 25269,
+  "__v": 0,
+  "classes": [
+    "Advanced Algebra",
+    "Math Skills A",
+    "Geometry"
+  ]
+}

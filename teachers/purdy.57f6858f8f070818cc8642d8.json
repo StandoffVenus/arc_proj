@@ -1,0 +1,24 @@
+{
+  "_id": "57f6858f8f070818cc8642d8",
+  "__v": 0,
+  "lastName": "Purdy",
+  "hours": {
+    "TSM": [
+      "2",
+      "3",
+      "5a/5b"
+    ],
+    "Geometry": [
+      "1",
+      "4a/4b",
+      "6"
+    ]
+  },
+  "email": "purdyle@masd.k12.wi.us",
+  "homeroom": 270,
+  "extension": 25270,
+  "classes": [
+    "Geometry",
+    "TSM"
+  ]
+}

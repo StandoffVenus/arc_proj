@@ -1,0 +1,26 @@
+{
+  "_id": "57f6a00300e4c50aa4a89ac6",
+  "__v": 0,
+  "lastName": "Wardecke",
+  "hours": {
+    "Algebra 1": [
+      "2",
+      "3",
+      "7"
+    ],
+    "Game And App Design": [
+      "4b/4c"
+    ],
+    "HTML Programming And JavaScript": [
+      "5a/5b"
+    ]
+  },
+  "email": "wardesa@masd.k12.wi.us",
+  "homeroom": 271,
+  "extension": 25271,
+  "classes": [
+    "Algebra 1",
+    "Game And App Design",
+    "HTML Programming And JavaScript"
+  ]
+}

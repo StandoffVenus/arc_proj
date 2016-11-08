@@ -1,25 +1,72 @@
-<div class="jumbotron">
-	<h1 class="text-center">Welcome!</h1>
+<script src="static/index.js"></script>
+<div class="alert alert-info">
+  <h1 class="text-xs-center">
+    Welcome!
+  </h1>
 </div>
-<div>
-	<table class="table">
-		<thead>
-			<tr>
-				<% for (let i = 0; i < teacherPaths.length; i++) { %>
-					<% // Making sure that the mongo's variables don't get included in the output %>	
-					<% if (teacherPaths[i].substring(0, 1) !== '_') { %>
-						<th>
-							<% // Making output of field names pretty %>
-							<%= (teacherPaths[i].toLowerCase().indexOf('name') < 0) ? teacherPaths[i].substring(0, 1).toUpperCase() + teacherPaths[i].substring(1).toLowerCase() : "Name"; %>
-						</th>				
-					<% } %>
-				<% } %>
-			</tr>
-		</thead>
-		<tbody>
-			<% for (let i = 0; i < teachers.length; i++) { %>
-
-			<% } %>	
-		</tbody>
-	</table>
+<div class="row">
+  <div class="col-xs-3 text-xs-center">
+    <a href="/checkin" class="btn btn-info col-xs-12">
+      <h3>Check in</h3>
+    </a>
+    <br />
+    <br />
+    <br />
+    <a href="/collections/show" class="btn btn-info col-xs-12">
+      <h3>Collections</h3>
+    </a>
+  </div>
+  <div class="col-xs-9">
+    <% if (typeof students !== 'undefined' && students.length > 0) { %>
+      <h2 class="pull-xs-left offset-xs-1">
+        Students
+      </h2>
+      <table class="table table-bordered table-sm table-inverse">
+        <thead>
+          <tr>
+            <th width="25%">
+              Last name
+            </th>
+            <th width="25%">
+              First name
+            </th>
+            <th width="50%">
+              Options
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let studentsKeys = Object.keys(students); %>
+          <% for (let i = 0; i < studentsKeys.length; i++) { %>
+            <tr>
+              <th>
+                <%=
+                  students[studentsKeys[i]].lastName;
+                %>
+              </th>
+              <th>
+                <%=
+                  students[studentsKeys[i]].firstName;
+                %>
+              </th>
+              <th>
+                <form action="/checkout" method="POST">
+                  <div class="container-fluid">
+                    <input type="submit" name="submit" value="Check out" class="btn btn-info pull-xs-left col-xs-5" />
+                    <a href="#comment<%= students[studentsKeys[i]]._id %>" class="btn btn-info pull-xs-right col-xs-5" onclick="setComment('<%= students[studentsKeys[i]]._id %>');">Set comment</a>
+                  </div>
+                  <input type="hidden" name="id" value="<%= students[studentsKeys[i]]._id %>" />
+                  <textarea style="font-weight: normal;" rows="3" type="text" maxlength="250" id="comment<%= students[studentsKeys[i]]._id %>" class="col-xs-12" name="comment"><%= students[studentsKeys[i]].comments %></textarea>
+                </form>
+              </th>
+            </tr>
+          <% } %> 
+        </tbody>
+      </table>
+    <% } else { %>
+      <h2 class="text-xs-center">
+        No students found.
+      </h2>
+    <% } %>
+  </div>
 </div>

@@ -1,0 +1,27 @@
+{
+  "_id": "57f3daee56ad79170060f0db",
+  "lastName": "Capaccio",
+  "hours": {
+    "Algebra Semester 1 Year": [
+      "6"
+    ],
+    "AP Stats": [
+      "3",
+      "4a/4b",
+      "7"
+    ],
+    "Honors Advanced Algebra": [
+      "1",
+      "4c/5a"
+    ]
+  },
+  "email": "capacan@masd.k12.wi.us",
+  "homeroom": 273,
+  "extension": 25273,
+  "__v": 0,
+  "classes": [
+    "Honors Advanced Algebra",
+    "AP Stats",
+    "Algebra Semester 1 Year"
+  ]
+}

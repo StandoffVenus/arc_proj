@@ -1,0 +1,23 @@
+{
+  "_id": "57f3daee56ad79170060f0e0",
+  "lastName": "Haasser",
+  "hours": {
+    "Algebra": [
+      "4c/5a",
+      "6"
+    ],
+    "Advanced Algebra": [
+      "2",
+      "3",
+      "4a/4b"
+    ]
+  },
+  "email": "haassji@masd.k12.wi.us",
+  "homeroom": 277,
+  "extension": 25277,
+  "__v": 0,
+  "classes": [
+    "Advanced Algebra",
+    "Algebra"
+  ]
+}
