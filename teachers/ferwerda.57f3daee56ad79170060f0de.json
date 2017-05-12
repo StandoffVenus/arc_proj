@@ -2,17 +2,17 @@
   "_id": "57f3daee56ad79170060f0de",
   "lastName": "Ferwerda",
   "hours": {
-    "Database Management": [
-      "4a/4b"
-    ],
-    "Honors Geometry": [
-      "3",
-      "4c/5b",
-      "6"
-    ],
     "Computer Science": [
       "1",
       "2"
+    ],
+    "Honors Geometry": [
+      "3",
+      "4c/5a",
+      "6"
+    ],
+    "Database Management": [
+      "4a/4b"
     ]
   },
   "email": "ferweja@masd.k12.wi.us",

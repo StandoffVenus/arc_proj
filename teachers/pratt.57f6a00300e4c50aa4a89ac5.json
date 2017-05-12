@@ -3,19 +3,19 @@
   "__v": 0,
   "lastName": "Pratt",
   "hours": {
-    "Precalc With Trig": [
-      "1",
-      "2",
-      "7"
-    ],
-    "Computer Programming": [
-      "4a/4b"
+    "Intro To Computer Science": [
+      "6"
     ],
     "AP Computer Science": [
       "5a/5b"
     ],
-    "Intro To Computer Science": [
-      "6"
+    "Computer Programming": [
+      "4a/4b"
+    ],
+    "Precalc With Trig": [
+      "1",
+      "2",
+      "7"
     ]
   },
   "email": "prattsc@masd.k12.wi.us",

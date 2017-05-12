@@ -2,17 +2,17 @@
   "_id": "57f3daee56ad79170060f0dd",
   "lastName": "Fairburn",
   "hours": {
-    "FST": [
-      "6",
-      "7"
-    ],
-    "Pre Algebra": [
-      "2"
-    ],
     "Advanced Algebra": [
       "1",
       "4a/4b",
       "5a/5b"
+    ],
+    "Pre Algebra": [
+      "2"
+    ],
+    "FST": [
+      "6",
+      "7"
     ]
   },
   "email": "fairbsh@masd.k12.wi.us",

@@ -2,17 +2,17 @@
   "_id": "57f3daee56ad79170060f0dc",
   "lastName": "Dettlaff",
   "hours": {
-    "AP Calculus AB": [
-      "3",
-      "4a/4b",
-      "6"
+    "FST": [
+      "1"
     ],
     "Honors Advanced Algebra": [
       "2",
       "7"
     ],
-    "FST": [
-      "1"
+    "AP Calculus AB": [
+      "3",
+      "4a/4b",
+      "6"
     ]
   },
   "email": "dettlro@masd.k12.wi.us",

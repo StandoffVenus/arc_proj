@@ -2,16 +2,16 @@
   "_id": "57f3daee56ad79170060f0e2",
   "lastName": "Mack",
   "hours": {
-    "Exploring Computer Science": [
-      "6"
-    ],
-    "Operating Systems And Servers": [
-      "3"
-    ],
     "Geometry": [
       "1",
       "2",
       "4c/5a"
+    ],
+    "Operating Systems And Servers": [
+      "3"
+    ],
+    "Exploring Computer Science": [
+      "6"
     ]
   },
   "email": "mackco@masd.k12.wi.us",

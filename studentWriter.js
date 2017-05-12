@@ -8,7 +8,7 @@ StudentWriter = function(filePath) {
   let write = (student) => {
     file_system.writeFile(
       this.path,
-      `STUDENT NAME\t|\tHOUR\t|\tHELPED WITH\r\n\r\n`
+      `${(new Date(Date.now())).toLocaleDateString()}\r\nSTUDENT NAME\t|\tHOUR\t|\tCOMING FROM\r\n\r\n`
       + (
         // Checking whether to write a student to the file
         (student) ?
@@ -56,14 +56,14 @@ StudentWriter = function(filePath) {
         else {
           let studentsBuffer = Buffer.concat(
             [
+	      Buffer.from(data),
               Buffer.from(
                 `${student.lastName}, ${student.firstName}\t|\t` 
                 + `${student.arcHour}\t|\t`
                 + ((student.comingFrom !== 'studyhall')
                   ? student.comingFrom
                   : student.studyHallRoom)
-                + '\r\n'),
-              Buffer.from(data)
+                + '\r\n')
             ]
           );
 

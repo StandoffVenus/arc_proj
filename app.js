@@ -59,16 +59,16 @@ const async           = require('async'),
     jsonFile 					= require('jsonfile'),
     // jsonfile reads json for us
 
-    updateTeachers    = require('./teachers/updateTeachers.js'),
     generateTeachers	= require('./teachers/generateTeachers.js'),
+    updateTeachers = require('./teachers/updateTeachers.js'),
     // Scripts for command-line arguments
 
     Schema = mongoose.Schema,
     // Schema allows you to create models for mongoose and the DB you're using
 
     STUDENT_FILE_SETTINGS = {
-    	"path" 	: "S:/",
-      "name"  : "students",
+    	"path" 	: path.join('S:', 'mhs', 'teachers'),
+      "name"  : "/students",
     	"ext"		: ".txt"
     },
     // Our student file settings
@@ -121,6 +121,9 @@ if (user_argv.generate) {
 if (user_argv.teachers) {
   updateTeachers(user_argv.teachers === 'force');
 }
+
+// Removing promise deprecation warning
+mongoose.Promise = global.Promise;
 
 // Connecting to the DB
 mongoose.connect(
@@ -381,8 +384,13 @@ app.get('/collections/:collection', (req, res) => {
       schemaName
     ).find(
       {
-
-      },
+	
+      }
+    ).sort(
+      {
+	time: -1
+      }
+    ).exec(
       (err, entries) => {
         if (err) {
           util.log(`Encountered an error when indexing with ${schemaName} schema.`);
@@ -835,31 +843,33 @@ app.post('/checkout', (req, res) => {
               util.log(`Error removing student ${req.body.id}.`);
               throw err;
             }
-
-            if (student.comments !== '') {
-              Teacher.findById(
-                student.teacherId,
-                (err, teacher) => {
-                  // Create and send an email under this email
-                  email.create(
-                    teacher.email,
-                    `${student.firstName} ${student.lastName} in MHS ARC`,
-                    `"${student.comments}" ~${student.helpedBy}`,
-                    (err, response) => {
-                      if (err)
-                        throw err;
-                      email.send(
-                        response.id,
-                        (err, response) => {
-                          if (err)
-                            throw err;
-                        }
-                      );
-                    }
-                  );
-                }
-              );
-            }
+			
+            Teacher.findById(
+              student.teacherId,
+              (err, teacher) => {
+				if (err)
+				  throw err;
+					
+                // Create and send an email under this email
+                email.create(
+                  teacher.email,
+                  `${student.firstName} ${student.lastName} in MHS ARC`,
+                  `${(student.comments !== '') ? '"' + student.comments + '"' : ''} ~${student.helpedBy}`,
+                  (err, response) => {
+                    if (err)
+                      throw err;
+						
+                    email.send(
+                      response.id,
+                      (err, response) => {
+                        if (err)
+                          throw err;
+                      }
+                    );
+                  }
+                );
+              }
+            );
           }
         );
       }
